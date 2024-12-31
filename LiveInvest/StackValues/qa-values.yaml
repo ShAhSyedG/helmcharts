@@ -7,7 +7,7 @@ global:
 deployment:
   # trade position service
   tradepositionservice:
-    image: tappeng/onboarding_tradeposition_service_lt
+    image: organisation/onboarding_tradeposition_service_lt
     tag: qa
     env:
     - name: ASPNETCORE_ENVIRONMENT
@@ -50,7 +50,7 @@ deployment:
 
   # autotrade - new - deployment
   autotrade-new-service:
-    image: tappeng/onboarding_new_autotrade_lt
+    image: organisation/onboarding_new_autotrade_lt
     tag: qa
     env:
     - name: ASPNETCORE_ENVIRONMENT
@@ -93,7 +93,7 @@ deployment:
 
   # account - opening - deployment
   accountopeningservice:
-    image: tappeng/onboarding_accountopening_lt
+    image: organisation/onboarding_accountopening_lt
     tag: qa
     env:
     - name: ASPNETCORE_ENVIRONMENT
@@ -137,7 +137,7 @@ deployment:
 
   # accountopening-grpc-deployment
   accountopening-grpcservice:
-    image: tappeng/onboarding_accountopening_grpc
+    image: organisation/onboarding_accountopening_grpc
     tag: qa
     env:
     - name: ASPNETCORE_ENVIRONMENT
@@ -180,7 +180,7 @@ deployment:
 
   # transactions-new-deployment
   transactions-new-service:
-    image: tappeng/onboarding_new_transactions_lt
+    image: organisation/onboarding_new_transactions_lt
     tag: qa
     env:
     - name: ASPNETCORE_ENVIRONMENT
@@ -223,7 +223,7 @@ deployment:
 
   # sdtrade-new-deployment
   sdtradeservice:
-    image: tappeng/onboarding_sdtrade_lt
+    image: organisation/onboarding_sdtrade_lt
     tag: qa
     env:
     - name: ASPNETCORE_ENVIRONMENT
@@ -266,7 +266,7 @@ deployment:
 
   #tradeexecution-new-service
   tradeexecution-new-service:
-    image: tappeng/onboarding_new_trade_execution_lt
+    image: organisation/onboarding_new_trade_execution_lt
     tag: qa
     env:
     - name: ASPNETCORE_ENVIRONMENT
@@ -308,7 +308,7 @@ deployment:
         command: [ "dotnet", "Trade.ExecutionReport.dll" ]
   #tradeposition-new-service
   tradeposition-new-service:
-    image: tappeng/onboarding_new_trade_position_lt
+    image: organisation/onboarding_new_trade_position_lt
     tag: qa
     env:
     - name: ASPNETCORE_ENVIRONMENT
@@ -350,7 +350,7 @@ deployment:
         command: [ "dotnet", "Trade.PositionService.dll" ]
   #traderecurring-new-service
   traderecurring-new-service:
-    image: tappeng/onboarding_new_trade_recurring_lt
+    image: organisation/onboarding_new_trade_recurring_lt
     tag: qa
     env:
     - name: ASPNETCORE_ENVIRONMENT
@@ -392,7 +392,7 @@ deployment:
         command: [ "dotnet", "Trade.Recurring.dll" ]
 
   operations-service:
-    image: tappeng/onboarding_operations_lt
+    image: organisation/onboarding_operations_lt
     tag: qa
     env:
     - name: ASPNETCORE_ENVIRONMENT
