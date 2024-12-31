@@ -7,7 +7,7 @@ global:
 deployment:
   # dataprocessingservice
   dataprocessingservice:
-    image: tappeng/robo_dataprocessingservice
+    image: organisation/robo_dataprocessingservice
     tag: dev
     env:
     - name: SPRING_PROFILES_ACTIVE
