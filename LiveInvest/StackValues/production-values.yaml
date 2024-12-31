@@ -7,7 +7,7 @@ global:
 deployment:
   # trade position service
   tradepositionservice:
-    image: tappeng/onboarding_tradeposition_service_lt
+    image: organisation/onboarding_tradeposition_service_lt
     tag: prod
     env:
     - name: ASPNETCORE_ENVIRONMENT
@@ -50,7 +50,7 @@ deployment:
 
   # transactions funds monitor service
   transactionsfunds-monitori-service:
-    image: tappeng/transactionfund.fundsstatusmonitor_lt
+    image: organisation/transactionfund.fundsstatusmonitor_lt
     tag: prod
     env:
     - name: ASPNETCORE_ENVIRONMENT
@@ -93,7 +93,7 @@ deployment:
 
   # transactions-new-deployment
   transactions-new-service:
-    image: tappeng/onboarding_new_transactions_lt
+    image: organisation/onboarding_new_transactions_lt
     tag: prod
     env:
     - name: ASPNETCORE_ENVIRONMENT
