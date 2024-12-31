@@ -7,7 +7,7 @@ global:
 deployment:
   # mobilebffservice
   mobilebffservice:
-    image: tappeng/robo_mobilebffservice
+    image: organisation/robo_mobilebffservice
     tag: uat
     env:
     - name: SPRING_PROFILES_ACTIVE
@@ -48,9 +48,9 @@ deployment:
       commandDefinations:
         command: ["java", "-jar", "/opt/app/*.jar"]
 
-  # tappenginesysteminterface
-  tappenginesysteminterface:
-    image: tappeng/robo_tappenginesysteminterface
+  # organisationinesysteminterface
+  organisationinesysteminterface:
+    image: organisation/robo_organisationinesysteminterface
     tag: uat
     env:
     - name: SPRING_PROFILES_ACTIVE
@@ -93,7 +93,7 @@ deployment:
 
   # rebalance service
   rebalanceservice:
-    image: tappeng/robo_rebalanceservice
+    image: organisation/robo_rebalanceservice
     tag: uat
     env:
     - name: SPRING_PROFILES_ACTIVE
@@ -136,7 +136,7 @@ deployment:
 
   # ModelPortfolio
   modelportfolio:
-    image: tappeng/robo_modelportfoliosysteminterface
+    image: organisation/robo_modelportfoliosysteminterface
     tag: uat
     env:
     - name: SPRING_PROFILES_ACTIVE
@@ -179,7 +179,7 @@ deployment:
 
   # Notification Gen
   notificationgen:
-    image: tappeng/robo_notificationgen
+    image: organisation/robo_notificationgen
     tag: uat
     env:
     - name: SPRING_PROFILES_ACTIVE
@@ -222,7 +222,7 @@ deployment:
 
   # robo Adavance Config
   roboadvconfig:
-    image: tappeng/robo_roboadvconfigservice
+    image: organisation/robo_roboadvconfigservice
     tag: uat
     env:
     - name: SPRING_PROFILES_ACTIVE
@@ -265,7 +265,7 @@ deployment:
 
   # Schedular
   schedular:
-    image: tappeng/robo_schedulerservice
+    image: organisation/robo_schedulerservice
     tag: uat
     env:
     - name: SPRING_PROFILES_ACTIVE
@@ -308,7 +308,7 @@ deployment:
 
   # Investor
   investor:
-    image: tappeng/robo_investorservice
+    image: organisation/robo_investorservice
     tag: uat
     env:
     - name: SPRING_PROFILES_ACTIVE
@@ -351,7 +351,7 @@ deployment:
 
   # Notification
   notification:
-    image: tappeng/robo_notificationservice
+    image: organisation/robo_notificationservice
     tag: uat
     env:
     - name: SPRING_PROFILES_ACTIVE
@@ -394,7 +394,7 @@ deployment:
 
   # Risk Assessment
   riskassessment:
-    image: tappeng/robo_riskassessmentservice
+    image: organisation/robo_riskassessmentservice
     tag: uat
     env:
     - name: SPRING_PROFILES_ACTIVE
@@ -437,7 +437,7 @@ deployment:
 
   # Financial Planning
   financialpanning:
-    image: tappeng/robo_finplanningservice
+    image: organisation/robo_finplanningservice
     tag: uat
     env:
     - name: SPRING_PROFILES_ACTIVE
@@ -480,7 +480,7 @@ deployment:
 
   # Robo Billing
   robobiling:
-    image: tappeng/robo_robobillingservice
+    image: organisation/robo_robobillingservice
     tag: uat
     env:
     - name: SPRING_PROFILES_ACTIVE
@@ -523,7 +523,7 @@ deployment:
 
   # Robo Billing
   simulation:
-    image: tappeng/robo_simulationservice
+    image: organisation/robo_simulationservice
     tag: uat
     env:
     - name: SPRING_PROFILES_ACTIVE
@@ -581,9 +581,9 @@ services:
     selector:
       app: mobilebffservice
 
-  # tappenginesysteminterface
-  tappenginesysteminterface:
-    name: tappenginesysteminterface
+  # organisationinesysteminterface
+  organisationinesysteminterface:
+    name: organisationinesysteminterface
 
     externalTrafficPolicy: Cluster
     ports:
@@ -591,7 +591,7 @@ services:
       targetPort: 8035
       protocol: TCP
     selector:
-      app: tappenginesysteminterface
+      app: organisationinesysteminterface
 
   # Rebalance Service
   rebalanceservice:
@@ -717,12 +717,12 @@ targetGroupBindings:
       name: mobilebffservice
       port: 8100
     targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:337223210769:targetgroup/qa-robo-mobilebffservice/35994dd41ce78dfb
-  #tappenginesysteminterface 8035
-  tappenginesysteminterface:
-    name: tappenginesysteminterface-tgb
+  #organisationinesysteminterface 8035
+  organisationinesysteminterface:
+    name: organisationinesysteminterface-tgb
 
     serviceRef:
-      name: tappenginesysteminterface
+      name: organisationinesysteminterface
       port: 8035
     targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:337223210769:targetgroup/qa-robo-tappsysteminterface/63e203976bd227f7
   #rebalanceservice 8025
