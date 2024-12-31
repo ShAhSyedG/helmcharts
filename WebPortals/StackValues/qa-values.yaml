@@ -4,10 +4,10 @@ global:
     name: adminpanel
     namespace: web-qa
     imagePullSecrets: docker-secret
-    certificatearn: arn:aws:acm:us-east-1:337223210769:certificate/b778ed01-2e09-4fb1-86ea-ac4f53fc12cd
+    certificatearn: arn:aws:acm:us-east-1:123456789:certificate/b778ed01-2e09-4fb1-86ea-ac4f53fc12cd
 deployment:
   adminpanel:
-    image: tappeng/admin-portal
+    image: organisation/admin-portal
     tag: qa
     env:
     - name: ENVIRONMENT
@@ -38,7 +38,7 @@ IngressRoute:
   adminpanel-qa:
     hostname:
     # Admin Panel Ingress
-    - host: furqan-test.tappengine.com
+    - host: furqan-test.organisationine.com
       http:
         paths:
         - path: /*
