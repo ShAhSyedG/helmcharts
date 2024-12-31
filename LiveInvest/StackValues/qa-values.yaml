@@ -1,0 +1,538 @@
+global:
+  app:
+    version: "1.0"
+    name: LiveInvesting
+    namespace: qa-lt
+    imagePullSecrets: docker-secret
+deployment:
+  # trade position service
+  tradepositionservice:
+    image: tappeng/onboarding_tradeposition_service_lt
+    tag: qa
+    env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: "QA"
+    ports:
+    - containerPort: 9000
+    replicacount: 1
+    hpa:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 2
+      cpuUtilization: 80
+      memoryUtilization: 80
+    resources:
+      limits:
+        cpu: 800m
+        memory: 900Mi
+      requests:
+        cpu: 500m
+        memory: 756Mi
+    readinessProbe:
+      httpGet:
+        path: /health/ok
+        port: 9000
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      failureThreshold: 24
+      successThreshold: 1
+    livenessProbe:
+      httpGet:
+        path: /health/ok
+        port: 9000
+      initialDelaySeconds: 15
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 1
+    command:
+      commandDefinations:
+        command: [ "java", "-jar", "/opt/app/*.jar" ]
+
+  # autotrade - new - deployment
+  autotrade-new-service:
+    image: tappeng/onboarding_new_autotrade_lt
+    tag: qa
+    env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: "QA"
+    ports:
+    - containerPort: 80
+    replicacount: 1
+    hpa:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 2
+      cpuUtilization: 80
+      memoryUtilization: 80
+    resources:
+      limits:
+        cpu: 800m
+        memory: 900Mi
+      requests:
+        cpu: 500m
+        memory: 756Mi
+    readinessProbe:
+      httpGet:
+        path: /health/ok
+        port: 80
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      failureThreshold: 24
+      successThreshold: 1
+    livenessProbe:
+      httpGet:
+        path: /health/ok
+        port: 80
+      initialDelaySeconds: 15
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 1
+    command:
+      commandDefinations:
+        command: [ "dotnet", "AutoTrade.WebApi.dll" ]
+
+  # account - opening - deployment
+  accountopeningservice:
+    image: tappeng/onboarding_accountopening_lt
+    tag: qa
+    env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: "QA"
+    ports:
+    - containerPort: 80
+      protocol: TCP
+    replicacount: 1
+    hpa:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 2
+      cpuUtilization: 80
+      memoryUtilization: 80
+    resources:
+      limits:
+        cpu: 800m
+        memory: 900Mi
+      requests:
+        cpu: 500m
+        memory: 756Mi
+    readinessProbe:
+      httpGet:
+        path: /health/ok
+        port: 80
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      failureThreshold: 24
+      successThreshold: 1
+    livenessProbe:
+      httpGet:
+        path: /health/ok
+        port: 80
+      initialDelaySeconds: 15
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 1
+    command:
+      commandDefinations:
+        command: [ "dotnet", "AccountOpening.WebApi.dll" ]
+
+  # accountopening-grpc-deployment
+  accountopening-grpcservice:
+    image: tappeng/onboarding_accountopening_grpc
+    tag: qa
+    env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: "QA"
+    ports:
+    - containerPort: 80
+    replicacount: 1
+    hpa:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 2
+      cpuUtilization: 80
+      memoryUtilization: 80
+    resources:
+      limits:
+        cpu: 800m
+        memory: 900Mi
+      requests:
+        cpu: 500m
+        memory: 756Mi
+    readinessProbe:
+      httpGet:
+        path: /health/ok
+        port: 80
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      failureThreshold: 24
+      successThreshold: 1
+    livenessProbe:
+      httpGet:
+        path: /health/ok
+        port: 80
+      initialDelaySeconds: 15
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 1
+    command:
+      commandDefinations:
+        command: [ "dotnet", "AccountOpening.GRPC.dll" ]
+
+  # transactions-new-deployment
+  transactions-new-service:
+    image: tappeng/onboarding_new_transactions_lt
+    tag: qa
+    env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: "QA"
+    ports:
+    - containerPort: 80
+    replicacount: 1
+    hpa:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 2
+      cpuUtilization: 80
+      memoryUtilization: 80
+    resources:
+      limits:
+        cpu: 800m
+        memory: 900Mi
+      requests:
+        cpu: 500m
+        memory: 756Mi
+    readinessProbe:
+      httpGet:
+        path: /health/ok
+        port: 80
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      failureThreshold: 24
+      successThreshold: 1
+    livenessProbe:
+      httpGet:
+        path: /health/ok
+        port: 80
+      initialDelaySeconds: 15
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 1
+    command:
+      commandDefinations:
+        command: [ "dotnet", "Transaction.WebApi.dll" ]
+
+  # sdtrade-new-deployment
+  sdtradeservice:
+    image: tappeng/onboarding_sdtrade_lt
+    tag: qa
+    env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: "QA"
+    ports:
+    - containerPort: 80
+    replicacount: 1
+    hpa:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 2
+      cpuUtilization: 80
+      memoryUtilization: 80
+    resources:
+      limits:
+        cpu: 800m
+        memory: 900Mi
+      requests:
+        cpu: 500m
+        memory: 756Mi
+    readinessProbe:
+      httpGet:
+        path: /health/ok
+        port: 80
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      failureThreshold: 24
+      successThreshold: 1
+    livenessProbe:
+      httpGet:
+        path: /health/ok
+        port: 80
+      initialDelaySeconds: 15
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 1
+    command:
+      commandDefinations:
+        command: [ "dotnet", "Trade.WebApi.dll" ]
+
+  #tradeexecution-new-service
+  tradeexecution-new-service:
+    image: tappeng/onboarding_new_trade_execution_lt
+    tag: qa
+    env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: "QA"
+    ports:
+    - containerPort: 8080
+    replicacount: 1
+    hpa:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 2
+      cpuUtilization: 80
+      memoryUtilization: 80
+    resources:
+      limits:
+        cpu: 800m
+        memory: 900Mi
+      requests:
+        cpu: 500m
+        memory: 756Mi
+    readinessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8080
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      failureThreshold: 24
+      successThreshold: 1
+    livenessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8080
+      initialDelaySeconds: 15
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 1
+    command:
+      commandDefinations:
+        command: [ "dotnet", "Trade.ExecutionReport.dll" ]
+  #tradeposition-new-service
+  tradeposition-new-service:
+    image: tappeng/onboarding_new_trade_position_lt
+    tag: qa
+    env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: "QA"
+    ports:
+    - containerPort: 8081
+    replicacount: 1
+    hpa:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 2
+      cpuUtilization: 80
+      memoryUtilization: 80
+    resources:
+      limits:
+        cpu: 800m
+        memory: 900Mi
+      requests:
+        cpu: 500m
+        memory: 756Mi
+    readinessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8081
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      failureThreshold: 24
+      successThreshold: 1
+    livenessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8081
+      initialDelaySeconds: 15
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 1
+    command:
+      commandDefinations:
+        command: [ "dotnet", "Trade.PositionService.dll" ]
+  #traderecurring-new-service
+  traderecurring-new-service:
+    image: tappeng/onboarding_new_trade_recurring_lt
+    tag: qa
+    env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: "QA"
+    ports:
+    - containerPort: 8082
+    replicacount: 1
+    hpa:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 2
+      cpuUtilization: 80
+      memoryUtilization: 80
+    resources:
+      limits:
+        cpu: 800m
+        memory: 900Mi
+      requests:
+        cpu: 500m
+        memory: 756Mi
+    readinessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8082
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      failureThreshold: 24
+      successThreshold: 1
+    livenessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8082
+      initialDelaySeconds: 15
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 1
+    command:
+      commandDefinations:
+        command: [ "dotnet", "Trade.Recurring.dll" ]
+
+  operations-service:
+    image: tappeng/onboarding_operations_lt
+    tag: qa
+    env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: "QA"
+    ports:
+    - containerPort: 80
+    replicacount: 1
+    hpa:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 2
+      cpuUtilization: 80
+      memoryUtilization: 80
+    resources:
+      limits:
+        cpu: 800m
+        memory: 900Mi
+      requests:
+        cpu: 500m
+        memory: 756Mi
+    readinessProbe:
+      httpGet:
+        path: /health/ok
+        port: 80
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      failureThreshold: 24
+      successThreshold: 1
+    livenessProbe:
+      httpGet:
+        path: /health/ok
+        port: 80
+      initialDelaySeconds: 15
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 1
+    command:
+      commandDefinations:
+        command: [ "dotnet", "Operations.WebApi.dll" ]
+
+################# Robo Services #############################
+
+services:
+  # mobilebffservice
+  tradepositionservice:
+    name: tradepositionservice
+    externalTrafficPolicy: Cluster
+    ports:
+    - port: 9000
+      targetPort: 9000
+      protocol: TCP
+    selector:
+      app: tradepositionservice
+
+  # autotrade-new-service
+  autotrade-new-service:
+    name: autotrade-new-service
+    ports:
+    - port: 7220
+      targetPort: 80
+      protocol: TCP
+    selector:
+      run: autotrade-new-service
+
+  # accountopening-service
+  accountopeningservice:
+    name: accountopening-service
+    ports:
+    - port: 7079
+      targetPort: 80
+      protocol: TCP
+    selector:
+      run: accountopeningservice
+
+  # accountopening - grpc -service
+  accountopening-grpcservice:
+    name: accountopening-grpc-service
+    ports:
+    - port: 7133
+      targetPort: 80
+      protocol: TCP
+    selector:
+      run: accountopening-grpcservice
+
+  # transactions-new-service
+  transactions-new-service:
+    name: transactions-new-service
+    ports:
+    - port: 7252
+      targetPort: 80
+      protocol: TCP
+    selector:
+      run: transactions-new-service
+
+  # sdtrade - service
+  sdtradeservice:
+    name: sdtradeservice
+    ports:
+    - port: 8182
+      targetPort: 80
+      protocol: TCP
+    selector:
+      run: sdtradeservice
+
+  #tradeexecution-new-service
+  tradeexecution-new-service:
+    name: tradeexecution-new-service
+    ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+    selector:
+      run: tradeexecution-new-service
+
+  #tradeposition-new-service
+  tradeposition-new-service:
+    name: tradeposition-new-service
+    ports:
+    - port: 8081
+      targetPort: 8081
+      protocol: TCP
+    selector:
+      run: tradeposition-new-service
+
+  #traderecurring-new-service
+  traderecurring-new-service:
+    name: traderecurring-new-service
+    ports:
+    - port: 8082
+      targetPort: 8082
+      protocol: TCP
+    selector:
+      run: traderecurring-new-service
+
+  # operations-service
+  operations-service:
+    name: operations-service
+    ports:
+    - port: 7078
+      targetPort: 80
+      protocol: TCP
+    selector:
+      run: operations-service

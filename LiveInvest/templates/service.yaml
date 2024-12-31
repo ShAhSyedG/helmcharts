@@ -1,0 +1,28 @@
+{{- $appVersion := .Values.global.app.version}}
+{{- $appName := .Values.global.app.name}}
+{{- $nameSpace := .Values.global.app.namespace }}
+
+{{- range $serviceName, $service := .Values.services }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $service.name }}
+  namespace: {{ $nameSpace }}
+  labels: 
+    meta.helm.sh/release-name: {{ $serviceName }}
+    meta.helm.sh/release-namespace: {{ $nameSpace }}
+    app: {{ $serviceName }}
+    version: {{ $appVersion | quote }}
+    run: {{ $serviceName }}
+spec:
+  selector:
+    run: {{ $serviceName }}
+  {{- if hasKey $service "ports" }}  
+  ports:
+  {{- with $service.ports }}
+  {{- toYaml . | nindent 2 }}
+  {{- end }}
+  {{- end }}
+  type: ClusterIP
+---
+{{- end }}

@@ -1,0 +1,52 @@
+{{- $releaseName := .Release.Name -}}
+{{- $appVersion := .Values.global.app.version}}
+{{- $appName := .Values.global.app.name}}
+{{- $chartName := .Chart.Name -}}
+{{- $chartVersion := .Chart.Version -}}
+{{- $imagePullSecrets := .Values.global.app.imagePullSecrets}}
+{{- $nameSpace := .Values.global.app.namespace }}
+{{- range $deploymentName, $deployments := .Values.deployment }}
+{{- $deploymentInstance := (printf "%v-%v" $releaseName $deploymentName) -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $deploymentName }}
+  namespace: {{ $nameSpace }}
+  labels:
+    meta.helm.sh/release-name: {{ $appName }}
+    meta.helm.sh/release-namespace: {{ $nameSpace }}
+    run: {{ $deploymentName }}
+spec:
+  {{- if hasKey $deployments "replicacount" }}
+  replicas: {{ $deployments.replicacount }}
+  {{- else }}
+  replicas: 1
+  {{- end }}
+  selector:
+    matchLabels:
+      run: {{ $deploymentName }}
+  template:
+    metadata:
+      labels:
+        run: {{ $deploymentName }}
+    spec:
+      imagePullSecrets:
+      - name: {{ $imagePullSecrets }}
+      containers:
+      - name: {{ $deploymentName }}
+        image: {{ $deployments.image }}:{{ $deployments.tag }}
+        imagePullPolicy: Always
+        {{- if hasKey $deployments "env" }}
+        env:
+        {{- with $deployments.env }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}  
+        {{- end }}
+        {{- if hasKey $deployments "ports" }}
+        ports:
+        {{- with $deployments.ports }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- end }}        
+---        
+{{- end }}
