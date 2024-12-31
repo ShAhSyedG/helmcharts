@@ -1,0 +1,28 @@
+global:
+  app:
+    version: '1.0'
+    name: practicetrading
+    namespace: qa-pt
+deployment:
+  grpc-onboarding:
+    image: tappeng/onboarding_onboarding_pt_grpc
+    tag: dev
+    env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: "Development"    
+    ports:
+    - containerPort: 80
+    replicacount: 1
+    command:
+      commandDefinations:
+        command: ['sh', '-c', "dotnet Trade.GRPC.dll" ]
+    imagePullSecrets:
+      imageSecret: docker-secret
+services:
+  grpc-onboarding:
+    name: grpc-onboardingservice
+    ports:
+    - name: grpc
+      protocol: TCP
+      port: 7133
+      targetPort: 80

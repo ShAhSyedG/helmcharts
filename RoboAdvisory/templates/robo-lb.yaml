@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: robo-lb-e
+  namespace: qa-robo
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: external
+    service.beta.kubernetes.io/aws-load-balancer-scheme: internal
+    service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+    service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+    service.beta.kubernetes.io/aws-load-balancer-subnets: subnet-06319c270ac5f0430, subnet-03d3e9784c3502b70
+    #service.beta.kubernetes.io/aws-load-balancer-name: api-uit-endpoint-robo
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 8005
+    targetPort: 8005
+    protocol: TCP
+    name: investorservice
+  selector:
+    run: investor

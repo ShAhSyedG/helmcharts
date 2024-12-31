@@ -1,0 +1,75 @@
+global:
+  app:
+    version: "1.0"
+    name: RoboAdvisory
+    namespace: uat
+    imagePullSecrets: docker-secret
+deployment:
+  # dataprocessingservice
+  dataprocessingservice:
+    image: tappeng/robo_dataprocessingservice
+    tag: uat
+    env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: "awsuit"
+    ports:
+    - containerPort: 8095
+    replicacount: 1
+    hpa:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 4
+      cpuUtilization: 80
+      memoryUtilization: 80
+    resources:
+      limits:
+        cpu: 800m
+        memory: 1200Mi
+      requests:
+        cpu: 500m
+        memory: 756Mi
+    readinessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8095
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      failureThreshold: 24
+      successThreshold: 1
+    livenessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8095
+      initialDelaySeconds: 15
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 1
+    command:
+      commandDefinations:
+        command: ["java", "-jar", "/opt/app/*.jar"]
+
+################# Robo Services #############################
+
+services:
+  # dataprocessingservice
+  mobilebffservice:
+    name: dataprocessingservice
+    externalTrafficPolicy: Cluster
+    ports:
+    - port: 8095
+      targetPort: 8095
+      protocol: TCP
+    selector:
+      app: dataprocessingservice
+
+#################### Target Group Bindings ##################
+
+#dataprocessingservice 8095
+targetGroupBindings:
+  dataprocessingservice-tgb:
+    name: dataprocessingservice-tgb
+
+    serviceRef:
+      name: dataprocessingservice
+      port: 8095
+    targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:337223210769:targetgroup/uat-dataprocessing-tgb/fd8364d3bf900ad1

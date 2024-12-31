@@ -1,0 +1,239 @@
+global:
+  app:
+    version: '1.0'
+    name: practicetrading
+    namespace: dev-pt
+deployment:
+# Gateway
+  gateway:
+    image: tappeng/onboarding_gateway_pt
+    tag: dev
+    env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: "Development"    
+    ports:
+    - containerPort: 80
+    replicacount: 1
+    serviceAccountName: dev-sa
+    command:
+      commandDefinations:
+        command: ['sh', '-c', "dotnet Gateway.dll" ]
+    imagePullSecrets:
+      imageSecret: docker-secret  
+# Tenant Management      
+  tenantmanagement:
+    image: tappeng/tenantmanagement
+    tag: latest
+    env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: "Development"        
+    env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: "Development"
+    ports:
+    - containerPort: 8081
+    - containerPort: 8082
+    replicacount: 1
+    command:
+      commandDefinations:
+        command: ['sh', '-c', "java -jar /app/app.jar" ]
+    imagePullSecrets:
+      imageSecret: docker-secret
+# Trade TopUp Rest      
+  tradetopup-rest:
+    image: tappeng/onboarding_tradetopup_pt
+    tag: dev
+    env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: "Development"        
+    ports:
+    - containerPort: 80
+    replicacount: 1
+    command:
+      commandDefinations:
+        command: ['sh', '-c', "dotnet Trade.TopUp.dll" ]
+    imagePullSecrets:
+      imageSecret: docker-secret        
+# Onboarding Rest 
+  onboarding-rest:
+    image: onboarding_onboarding_pt
+    tag: dev
+    env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: "Development"    
+    ports:
+    - containerPort: 80
+    replicacount: 1
+    command:
+      commandDefinations:
+        command: ['sh', '-c', "dotnet OnBoarding.WebApi.dll" ]
+    imagePullSecrets:
+      imageSecret: docker-secret 
+# Trade Rest
+  trade-rest:
+    image: tappeng/onboarding_trade_pt
+    tag: dev
+    env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: "Development"    
+    ports:
+    - containerPort: 80
+    replicacount: 1
+    command:
+      commandDefinations:
+        command: ['sh', '-c', "dotnet Trade.WebApi.dll" ]
+    imagePullSecrets:
+      imageSecret: docker-secret
+# GRPC Trade 
+  grpc-trade:
+    image: tappeng/onboarding_trade_pt_grpc
+    tag: dev
+    env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: "Development"    
+    ports:
+    - containerPort: 80
+    replicacount: 1
+    command:
+      commandDefinations:
+        command: ['sh', '-c', "dotnet Trade.GRPC.dll" ]
+    imagePullSecrets:
+      imageSecret: docker-secret
+# GRPC Onboarding 
+  grpc-onboarding:
+    image: tappeng/onboarding_onboarding_pt_grpc
+    tag: dev
+    env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: "Development"    
+    ports:
+    - containerPort: 80
+    replicacount: 1
+    command:
+      commandDefinations:
+        command: ['sh', '-c', "dotnet Trade.GRPC.dll" ]
+    imagePullSecrets:
+      imageSecret: docker-secret
+
+    # autoscaling:
+    #   enabled: true
+    #   minReplicas: 1
+    #   maxReplicas: 16
+    #   targetCPUUtilizationPercentage: 80
+    #   targetMemoryUtilizationPercentage: 80
+    # serviceAccountName: dev-sa  
+    # resources:
+    #   limits:
+    #     cpu: 512m
+    #     memory: 768Mi
+    #   requests:
+    #     cpu: 256m
+    #     memory: 512Mi
+    # readinessProbe:
+    #   httpGet:
+    #     path: /health/ok
+    #     port: 8081
+    #   initialDelaySeconds: 10
+    #   periodSeconds: 10
+    #   failureThreshold: 24
+    #   successThreshold: 1
+    # livenessProbe:
+    #   httpGet:
+    #     path: /health/ok
+    #     port: 8081
+    #   initialDelaySeconds: 15
+    #   periodSeconds: 15
+    #   timeoutSeconds: 5
+    #   failureThreshold: 1
+  # Add Pod Anti-Affinity here
+    # affinity:
+    #   podAntiAffinity:
+    #     requiredDuringSchedulingIgnoredDuringExecution:
+    #       - labelSelector:
+    #           matchExpressions:
+    #             - key: app
+    #               operator: In
+    #               values:
+    #                 - tenant-management
+    #         topologyKey: "kubernetes.io/hostname"
+    # # volumesList:
+    # #   volumesListDefinations:
+    # #     volumes:
+    # #     - name: env
+    # #       emptyDir: {}
+    # # volumesMountsList:
+    # #   volumesMountsListDefinations:
+    # #     volumeMounts:
+    # #     - name: env
+    # #       mountPath: "/var/www/vhosts/configs"
+    # #       subPath: .env
+
+  
+services:
+  gateway:
+    name: gatewayservice
+    ports:
+    - name: grpc
+      protocol: TCP
+      port: 80
+      targetPort: 80
+  tenantmanagement:
+    name: 'tenantmanagementservice'
+    ports:
+    - name: grpc
+      protocol: TCP
+      port: 8082          # External port (clients will connect to this port)
+      targetPort: 8082    # Internal port on the pod (where gRPC server listens)
+    - name: http
+      protocol: TCP
+      port: 8081             # External port (clients will connect to this port)
+      targetPort: 8081
+  tradetopup-rest:
+    name: tradetopupservice
+    ports:
+    - name: grpc
+      protocol: TCP
+      port: 7079
+      targetPort: 80   
+  onboarding-rest:
+    name: onboardingservice
+    ports:
+    - name: grpc
+      protocol: TCP
+      port: 7079
+      targetPort: 80       
+  trade-rest:
+    name: tradeservice
+    ports:
+    - name: grpc
+      protocol: TCP
+      port: 8182
+      targetPort: 80     
+  grpc-trade:
+    name: grpc-tradeservice
+    ports:
+    - name: grpc
+      protocol: TCP
+      port: 8182
+      targetPort: 80
+  grpc-onboarding:
+    name: grpc-onboardingservice
+    ports:
+    - name: grpc
+      protocol: TCP
+      port: 7133
+      targetPort: 80       
+
+IngressRoute:
+  tenant-management-service:
+    hostname: 
+    - host: "tm-pt-live.tapengine.com"
+      http:
+        paths:
+        - pathType: Prefix
+          path: "/"
+          backend:
+            service:
+              name: tenantmanagementservice
+              port:
+                number: 80

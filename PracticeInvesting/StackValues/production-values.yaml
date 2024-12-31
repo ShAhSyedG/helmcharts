@@ -1,0 +1,290 @@
+global:
+  app:
+    version: '1.0'
+    name: practicetrading
+    namespace: prod-pt
+    imagePullSecrets: docker-secret
+deployment:
+# Gateway
+  gateway:
+    image: tappeng/onboarding_gateway_pt
+    tag: prod
+    env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: "Prod"
+    ports:
+    - containerPort: 80
+    replicacount: 1
+    serviceAccountName: dev-sa
+    command:
+      commandDefinations:
+        command: ['sh', '-c', "dotnet Gateway.dll" ]
+# Onbaording Rest
+  onboarding:
+    image: tappeng/onboarding_onboarding_lt
+    tag: prod
+    env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: "Prod"    
+    ports:
+    - containerPort: 7079
+    replicacount: 1
+
+# Trade TopUp Rest      
+  tradetopup-rest:
+    image: tappeng/onboarding_tradetopup_pt
+    tag: prod
+    env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: "Prod"        
+    ports:
+    - containerPort: 80
+    replicacount: 1
+    command:
+      commandDefinations:
+        command: ['sh', '-c', "dotnet Trade.TopUp.dll" ]
+     
+# Onboarding Rest 
+  onboarding-rest:
+    image: tappeng/onboarding_onboarding_pt
+    tag: dev
+    env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: "Prod"    
+    ports:
+    - containerPort: 80
+    replicacount: 1
+    command:
+      commandDefinations:
+        command: ['sh', '-c', "dotnet OnBoarding.WebApi.dll" ]
+# Trade Rest
+  trade-rest:
+    image: tappeng/onboarding_trade_pt
+    tag: dev
+    env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: "Prod"    
+    ports:
+    - containerPort: 80
+    replicacount: 1
+    command:
+      commandDefinations:
+        command: ['sh', '-c', "dotnet Trade.WebApi.dll" ]
+
+# Trade Recurring Rest        
+  traderecurring-rest:
+    image: tappeng/onboarding_trade_recurring_pt
+    tag: prod
+    env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: "Prod" 
+    ports:
+    - containerPort: 9091  
+    replicacount: 1
+
+# Trade Execution Report Rest
+  tradeexecutionreport-rest:
+    image: tappeng/onboarding_trade_execution_report_pt
+    tag: prod
+    env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: "Prod"    
+    ports:
+    - containerPort: 80
+    replicacount: 1
+
+# GRPC Trade 
+  grpc-trade:
+    image: tappeng/onboarding_trade_pt_grpc
+    tag: dev
+    env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: "Prod"    
+    ports:
+    - containerPort: 80
+    replicacount: 1
+    command:
+      commandDefinations:
+        command: ['sh', '-c', "dotnet Trade.GRPC.dll" ]
+
+# GRPC Onboarding 
+  grpc-onboarding:
+    image: tappeng/onboarding_onboarding_pt_grpc
+    tag: dev
+    env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: "Prod"    
+    ports:
+    - containerPort: 80
+    replicacount: 1
+    command:
+      commandDefinations:
+        command: ['sh', '-c', "dotnet Trade.GRPC.dll" ]
+  
+# IAM Deployment
+  # keycloak:
+  #   image: tappeng/keycloak
+  #   tag: production
+  #   ports:
+  #   - containerPort: 8081
+  #   command:
+  #   - "/bin/bash"
+  #   - "-c"
+  #   - "curl -L -o /opt/keycloak/lib/postgresql-42.3.3.jar https://jdbc.postgresql.org/download/postgresql-42.3.3.jar && /opt/keycloak/bin/kc.sh start"
+  #   imagePullSecrets:
+  #     imageSecret: docker-secret
+# # Configurations Deployment
+#   configurations:
+#     image: tappeng/onboarding_configurations_lt
+#     tag: dev
+#     env:
+#     - name: ASPNETCORE_ENVIRONMENT
+#       value: "Prod"    
+#     ports:
+#     - containerPort: 5174
+#     imagePullSecrets:
+#       imageSecret: docker-secret
+# # Miscellaneous Deployment
+#   miscellaneous:
+#     image: tappeng/onboarding_miscellaneous_lt
+#     tag: dev
+#     env:
+#     - name: ASPNETCORE_ENVIRONMENT
+#       value: "Prod"    
+#     ports:
+#     - containerPort: 7189
+#     imagePullSecrets:
+#       imageSecret: docker-secret
+# # GRPC Learn Management Deployment
+#   learnmanagement:
+#     image: tappeng/learnmanagement
+#     tag: qa
+#     env:
+#     - name: ASPNETCORE_ENVIRONMENT
+#       value: "Prod"    
+#     ports:
+#     - containerPort: 7010
+#     - containerPort: 5062
+
+###### Services Section ######
+services:
+# Gateway Rest Service
+  gateway:
+    name: gatewayservice
+    ports:
+    - name: grpc
+      protocol: TCP
+      port: 80
+      targetPort: 80
+# Trade TopUp Rest Service
+  tradetopup-rest:
+    name: tradetopupservice
+    ports:
+    - name: grpc
+      protocol: TCP
+      port: 7079
+      targetPort: 80   
+# Onboarding Rest Service
+  onboarding:
+    name: onboardingservice
+    ports:
+    - name: grpc
+      protocol: TCP
+      port: 7079
+      targetPort: 80    
+# Trade Rest Service   
+  trade-rest:
+    name: tradeservice
+    ports:
+    - name: grpc
+      protocol: TCP
+      port: 8182
+      targetPort: 80
+# Trade Recurring Rest Service
+  recurring-trade-service:
+    name: traderecurringservice
+    ports:
+    - name: grpc
+      protocol: TCP
+      port: 9091
+      targetPort: 9091  
+# Trade Execution Report Rest Service
+  tradeexecutionreport-rest:
+    name: tradeexecutionreportservice
+    ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 80
+      
+# GRPC Trade Service  
+  grpc-trade:
+    name: grpc-tradeservice
+    ports:
+    - name: grpc
+      protocol: TCP
+      port: 8182
+      targetPort: 80
+# GRPC Onboarding Service      
+  grpc-onboarding:
+    name: grpc-onboardingservice
+    ports:
+    - name: grpc
+      protocol: TCP
+      port: 7133
+      targetPort: 80   
+        
+# # Tenant Management Service
+#   tenantmanagement:
+#     name: 'tenantmanagementservice'
+#     ports:
+#     - name: grpc
+#       protocol: TCP
+#       port: 8082          # External port (clients will connect to this port)
+#       targetPort: 8082    # Internal port on the pod (where gRPC server listens)
+#     - name: http
+#       protocol: TCP
+#       port: 8081             # External port (clients will connect to this port)
+#       targetPort: 8081
+# IAM services     
+  # keycloak:
+  #   name: 'keycloakservice'
+  #   ports:
+  #   - name: http
+  #     protocol: TCP
+  #     port: 80          # External port (clients will connect to this port)
+  #     targetPort: 8080    # Internal port on the pod (where gRPC server listens)
+# Configurations Service
+#   configurations:
+#     name: configurationsservice
+#     ports:
+#     - name: grpc
+#       protocol: TCP
+#       port: 5174
+#       targetPort: 80
+# Miscellaneous Service
+IngressRoute:
+  gateway-ingress:
+    hostname: 
+    - host: "prod-pt-onboarding-api.tappengine.com"
+      http:
+        paths:
+        - pathType: Prefix
+          path: "/"
+          backend:
+            service:
+              name: gatewayservice
+              port:
+                number: 80
+  # iam-ingress:
+  #   hostname: 
+  #   - host: "iam.tappengine.com"
+  #     http:
+  #       paths:
+  #       - pathType: Prefix
+  #         path: "/"
+  #         backend:
+  #           service:
+  #             name: iamservice
+  #             port:
+  #               number: 80

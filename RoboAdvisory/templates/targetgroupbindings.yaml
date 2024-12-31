@@ -1,0 +1,20 @@
+{{- $appVersion := .Values.global.app.version }}
+{{- $appName := .Values.global.app.name }}
+{{- $nameSpace := .Values.global.app.namespace }}
+{{- range $targetGroupBindingName, $targetGroupBinding := .Values.targetGroupBindings }}
+---
+apiVersion: elbv2.k8s.aws/v1beta1
+kind: TargetGroupBinding
+metadata:
+  name: {{ $targetGroupBinding.name }}
+  namespace: {{ $nameSpace }}
+spec:
+  serviceRef:
+    name: {{ $targetGroupBinding.serviceRef.name }}
+    port: {{ $targetGroupBinding.serviceRef.port }}
+  targetGroupARN: {{ $targetGroupBinding.targetGroupARN }}
+---
+{{- end }}
+
+
+

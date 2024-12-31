@@ -1,0 +1,54 @@
+global:
+  app:
+    version: '1.0'
+    name: adminpanel
+    namespace: web-qa
+    imagePullSecrets: docker-secret
+    certificatearn: arn:aws:acm:us-east-1:337223210769:certificate/b778ed01-2e09-4fb1-86ea-ac4f53fc12cd
+deployment:
+  adminpanel:
+    image: tappeng/admin-portal
+    tag: qa
+    env:
+    - name: ENVIRONMENT
+      value: "QA"
+    ports:
+    - containerPort: 80
+    containerPort: 80
+    accessPort: 80
+    replicacount: 1
+
+
+
+#################### WEB SERVICES #########################
+services:
+  adminpanel:
+    name: livetrading-admin-service
+    ports:
+    - name: https
+      protocol: TCP
+      port: 80
+      targetPort: 80
+    selector:
+      run: adminpanel
+
+##################### WEB INGRESSES ########################
+IngressRoute:
+  # Admin Panel App
+  adminpanel-qa:
+    hostname:
+    # Admin Panel Ingress
+    - host: furqan-test.tappengine.com
+      http:
+        paths:
+        - path: /*
+          pathType: ImplementationSpecific
+          backend:
+            service:
+              name: livetrading-admin-service
+              port:
+                number: 80
+
+
+
+

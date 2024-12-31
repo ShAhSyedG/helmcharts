@@ -1,0 +1,29 @@
+global:
+  app:
+    version: '1.0'
+    name: practicetrading
+    namespace: dev-pt
+deployment:
+# Trade Rest
+  trade-rest:
+    image: tappeng/onboarding_trade_pt
+    tag: dev
+    env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: "Development"    
+    ports:
+    - containerPort: 80
+    replicacount: 1
+    command:
+      commandDefinations:
+        command: ['sh', '-c', "dotnet Trade.WebApi.dll" ]
+    imagePullSecrets:
+      imageSecret: docker-secret
+services:
+  trade-rest:
+    name: tradeservice
+    ports:
+    - name: grpc
+      protocol: TCP
+      port: 8182
+      targetPort: 80

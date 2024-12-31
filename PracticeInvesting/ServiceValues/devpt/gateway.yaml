@@ -1,0 +1,44 @@
+global:
+  app:
+    version: '1.0'
+    name: practicetrading
+    namespace: production
+deployment:
+# Gateway
+  gateway:
+    image: tappeng/onboarding_gateway_pt
+    tag: dev
+    env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: "Development"    
+    ports:
+    - containerPort: 80
+    replicacount: 1
+    serviceAccountName: dev-sa
+    command:
+      commandDefinations:
+        command: ['sh', '-c', "dotnet Gateway.dll" ]
+    imagePullSecrets:
+      imageSecret: docker-secret
+services:
+  gateway:
+    name: gatewayservice
+    ports:
+    - name: grpc
+      protocol: TCP
+      port: 80
+      targetPort: 80
+      
+IngressRoute:
+  tenant-management-service:
+    hostname: 
+    - host: "tm-pt-live.tapengine.com"
+      http:
+        paths:
+        - pathType: Prefix
+          path: "/"
+          backend:
+            service:
+              name: tenantmanagementservice
+              port:
+                number: 80

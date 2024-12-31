@@ -1,0 +1,36 @@
+global:
+  app:
+    version: '1.0'
+    name: practicetrading
+    namespace: qa-pt
+deployment:
+  tenantmanagement:
+    image: tappeng/tenantmanagement
+    tag: latest
+    env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: "Development"        
+    env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: "Development"
+    ports:
+    - containerPort: 8081
+    - containerPort: 8082
+    replicacount: 1
+    command:
+      commandDefinations:
+        command: ['sh', '-c', "java -jar /app/app.jar" ]
+    imagePullSecrets:
+      imageSecret: docker-secret
+services:
+  tenantmanagement:
+    name: 'tenantmanagementservice'
+    ports:
+    - name: grpc
+      protocol: TCP
+      port: 8082          # External port (clients will connect to this port)
+      targetPort: 8082    # Internal port on the pod (where gRPC server listens)
+    - name: http
+      protocol: TCP
+      port: 8081             # External port (clients will connect to this port)
+      targetPort: 8081

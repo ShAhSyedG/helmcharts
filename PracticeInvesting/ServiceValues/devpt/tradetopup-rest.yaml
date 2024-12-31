@@ -1,0 +1,29 @@
+global:
+  app:
+    version: '1.0'
+    name: practicetrading
+    namespace: dev-pt
+deployment:
+# Trade TopUp Rest      
+  tradetopup-rest:
+    image: tappeng/onboarding_tradetopup_pt
+    tag: dev
+    env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: "Development"        
+    ports:
+    - containerPort: 80
+    replicacount: 1
+    command:
+      commandDefinations:
+        command: ['sh', '-c', "dotnet Trade.TopUp.dll" ]
+    imagePullSecrets:
+      imageSecret: docker-secret
+services:
+  tradetopup-rest:
+    name: tradetopupservice
+    ports:
+    - name: grpc
+      protocol: TCP
+      port: 7079
+      targetPort: 80   

@@ -1,0 +1,29 @@
+global:
+  app:
+    version: '1.0'
+    name: practicetrading
+    namespace: production
+deployment:
+# Onboarding Rest 
+  onboarding-rest:
+    image: onboarding_onboarding_pt
+    tag: dev
+    env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: "Production"    
+    ports:
+    - containerPort: 80
+    replicacount: 1
+    command:
+      commandDefinations:
+        command: ['sh', '-c', "dotnet OnBoarding.WebApi.dll" ]
+    imagePullSecrets:
+      imageSecret: docker-secret 
+services:
+  onboarding-rest:
+    name: onboardingservice
+    ports:
+    - name: grpc
+      protocol: TCP
+      port: 7079
+      targetPort: 80   

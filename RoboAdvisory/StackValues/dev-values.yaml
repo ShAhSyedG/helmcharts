@@ -1,0 +1,812 @@
+global:
+  app:
+    version: "1.0"
+    name: RoboAdvisory
+    namespace: dev-robo
+    imagePullSecrets: docker-secret
+deployment:
+  # mobilebffservice
+  mobilebffservice:
+    image: tappeng/robo_mobilebffservice
+    tag: dev
+    env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: "awsuit"
+    ports:
+    - containerPort: 8100
+    replicacount: 1
+    hpa:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 4
+      cpuUtilization: 80
+      memoryUtilization: 80
+    resources:
+      limits:
+        cpu: 800m
+        memory: 1200Mi
+      requests:
+        cpu: 500m
+        memory: 756Mi
+    readinessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8100
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      failureThreshold: 24
+      successThreshold: 1
+    livenessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8100
+      initialDelaySeconds: 15
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 1
+    command:
+      commandDefinations:
+        command: ["java", "-jar", "/opt/app/*.jar"]
+
+  # tappenginesysteminterface
+  tappenginesysteminterface:
+    image: tappeng/robo_tappenginesysteminterface
+    tag: dev
+    env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: "awsuit"
+    ports:
+    - containerPort: 8035
+    replicacount: 1
+    hpa:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 4
+      cpuUtilization: 80
+      memoryUtilization: 80
+    resources:
+      limits:
+        cpu: 800m
+        memory: 1200Mi
+      requests:
+        cpu: 500m
+        memory: 756Mi
+    readinessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8035
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      failureThreshold: 24
+      successThreshold: 1
+    livenessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8035
+      initialDelaySeconds: 15
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 1
+    command:
+      commandDefinations:
+        command: ["java", "-jar", "/opt/app/*.jar"]
+
+  # rebalance service
+  rebalanceservice:
+    image: tappeng/robo_rebalanceservice
+    tag: dev
+    env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: "awsuit"
+    ports:
+    - containerPort: 8025
+    replicacount: 1
+    hpa:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 4
+      cpuUtilization: 80
+      memoryUtilization: 80
+    resources:
+      limits:
+        cpu: 800m
+        memory: 1200Mi
+      requests:
+        cpu: 500m
+        memory: 756Mi
+    readinessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8025
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      failureThreshold: 24
+      successThreshold: 1
+    livenessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8025
+      initialDelaySeconds: 15
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 1
+    command:
+      commandDefinations:
+        command: ["java", "-jar", "/opt/app/*.jar"]
+
+  # ModelPortfolio
+  modelportfolio:
+    image: tappeng/robo_modelportfoliosysteminterface
+    tag: dev
+    env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: "awsuit"
+    ports:
+    - containerPort: 8015
+    replicacount: 1
+    hpa:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 4
+      cpuUtilization: 80
+      memoryUtilization: 80
+    resources:
+      limits:
+        cpu: 800m
+        memory: 1200Mi
+      requests:
+        cpu: 500m
+        memory: 756Mi
+    readinessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8015
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      failureThreshold: 24
+      successThreshold: 1
+    livenessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8015
+      initialDelaySeconds: 15
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 1
+    command:
+      commandDefinations:
+        command: ["java", "-jar", "/opt/app/*.jar"]
+
+  # Notification Gen
+  notificationgen:
+    image: tappeng/robo_notificationgen
+    tag: dev
+    env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: "awsuit"
+    ports:
+    - containerPort: 8060
+    replicacount: 1
+    hpa:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 4
+      cpuUtilization: 80
+      memoryUtilization: 80
+    resources:
+      limits:
+        cpu: 800m
+        memory: 1200Mi
+      requests:
+        cpu: 500m
+        memory: 756Mi
+    readinessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8060
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      failureThreshold: 24
+      successThreshold: 1
+    livenessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8060
+      initialDelaySeconds: 15
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 1
+    command:
+      commandDefinations:
+        command: ["java", "-jar", "/opt/app/*.jar"]
+
+  # robo Adavance Config
+  roboadvconfig:
+    image: tappeng/robo_roboadvconfigservice
+    tag: dev
+    env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: "awsuit"
+    ports:
+    - containerPort: 8020
+    replicacount: 1
+    hpa:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 4
+      cpuUtilization: 80
+      memoryUtilization: 80
+    resources:
+      limits:
+        cpu: 800m
+        memory: 1200Mi
+      requests:
+        cpu: 500m
+        memory: 756Mi
+    readinessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8020
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      failureThreshold: 24
+      successThreshold: 1
+    livenessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8020
+      initialDelaySeconds: 15
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 1
+    command:
+      commandDefinations:
+        command: ["java", "-jar", "/opt/app/*.jar"]
+
+  # Schedular
+  schedular:
+    image: tappeng/robo_schedulerservice
+    tag: dev
+    env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: "awsuit"
+    ports:
+    - containerPort: 8040
+    replicacount: 1
+    hpa:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 4
+      cpuUtilization: 80
+      memoryUtilization: 80
+    resources:
+      limits:
+        cpu: 800m
+        memory: 1200Mi
+      requests:
+        cpu: 500m
+        memory: 756Mi
+    readinessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8040
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      failureThreshold: 24
+      successThreshold: 1
+    livenessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8040
+      initialDelaySeconds: 15
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 1
+    command:
+      commandDefinations:
+        command: ["java", "-jar", "/opt/app/*.jar"]
+
+  # Investor
+  investor:
+    image: tappeng/robo_investorservice
+    tag: dev
+    env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: "awsuit"
+    ports:
+    - containerPort: 8005
+    replicacount: 1
+    hpa:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 4
+      cpuUtilization: 80
+      memoryUtilization: 80
+    resources:
+      limits:
+        cpu: 800m
+        memory: 1200Mi
+      requests:
+        cpu: 500m
+        memory: 756Mi
+    readinessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8005
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      failureThreshold: 24
+      successThreshold: 1
+    livenessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8005
+      initialDelaySeconds: 15
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 1
+    command:
+      commandDefinations:
+        commnad: ["java", "-jar", "/opt/app/*.jar"]
+
+  # Notification
+  notification:
+    image: tappeng/robo_notificationservice
+    tag: dev
+    env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: "awsuit"
+    ports:
+    - containerPort: 8055
+    replicacount: 1
+    hpa:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 4
+      cpuUtilization: 80
+      memoryUtilization: 80
+    resources:
+      limits:
+        cpu: 800m
+        memory: 1200Mi
+      requests:
+        cpu: 500m
+        memory: 756Mi
+    readinessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8055
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      failureThreshold: 24
+      successThreshold: 1
+    livenessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8055
+      initialDelaySeconds: 15
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 1
+    command:
+      commandDefinations:
+        command: ["java", "-jar", "/opt/app/*.jar"]
+
+  # Risk Assessment
+  riskassessment:
+    image: tappeng/robo_riskassessmentservice
+    tag: dev
+    env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: "awsuit"
+    ports:
+    - containerPort: 8010
+    replicacount: 1
+    hpa:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 4
+      cpuUtilization: 80
+      memoryUtilization: 80
+    resources:
+      limits:
+        cpu: 800m
+        memory: 1200Mi
+      requests:
+        cpu: 500m
+        memory: 756Mi
+    readinessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8010
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      failureThreshold: 24
+      successThreshold: 1
+    livenessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8010
+      initialDelaySeconds: 15
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 1
+    command:
+      commandDefinations:
+        command: ["java", "-jar", "/opt/app/*.jar"]
+
+  # Financial Planning
+  financialpanning:
+    image: tappeng/robo_finplanningservice
+    tag: dev
+    env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: "awsuit"
+    ports:
+    - containerPort: 8065
+    replicacount: 1
+    hpa:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 4
+      cpuUtilization: 80
+      memoryUtilization: 80
+    resources:
+      limits:
+        cpu: 800m
+        memory: 1200Mi
+      requests:
+        cpu: 500m
+        memory: 756Mi
+    readinessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8065
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      failureThreshold: 24
+      successThreshold: 1
+    livenessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8065
+      initialDelaySeconds: 15
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 1
+    command:
+      commandDefinations:
+        command: ["java", "-jar", "/opt/app/*.jar"]
+
+  # Robo Billing
+  robobiling:
+    image: tappeng/robo_robobillingservice
+    tag: dev
+    env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: "awsuit"
+    ports:
+    - containerPort: 8090
+    replicacount: 1
+    hpa:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 4
+      cpuUtilization: 80
+      memoryUtilization: 80
+    resources:
+      limits:
+        cpu: 800m
+        memory: 1200Mi
+      requests:
+        cpu: 500m
+        memory: 756Mi
+    readinessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8090
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      failureThreshold: 24
+      successThreshold: 1
+    livenessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8090
+      initialDelaySeconds: 15
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 1
+    command:
+      commandDefinations:
+        command: ["java", "-jar", "/opt/app/*.jar"]
+
+  # Robo Billing
+  simulation:
+    image: tappeng/robo_simulationservice
+    tag: dev
+    env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: "awsuit"
+    ports:
+    - containerPort: 8050
+    replicacount: 1
+    hpa:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 4
+      cpuUtilization: 80
+      memoryUtilization: 80
+    resources:
+      limits:
+        cpu: 800m
+        memory: 1200Mi
+      requests:
+        cpu: 500m
+        memory: 756Mi
+    readinessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8050
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      failureThreshold: 24
+      successThreshold: 1
+    livenessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8050
+      initialDelaySeconds: 15
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 1
+    command:
+      commandDefinations:
+        command: ["java", "-jar", "/opt/app/*.jar"]
+
+
+
+
+################# Robo Services #############################
+
+services:
+  # mobilebffservice
+  mobilebffservice:
+    name: mobilebffservice
+    externalTrafficPolicy: Cluster
+    ports:
+    - port: 8100
+      targetPort: 8100
+      protocol: TCP
+    selector:
+      app: mobilebffservice
+
+  # tappenginesysteminterface
+  tappenginesysteminterface:
+    name: tappenginesysteminterface
+
+    externalTrafficPolicy: Cluster
+    ports:
+    - port: 8035
+      targetPort: 8035
+      protocol: TCP
+    selector:
+      app: tappenginesysteminterface
+
+  # Rebalance Service
+  rebalanceservice:
+    name: rebalanceservice
+    externalTrafficPolicy: Cluster
+    ports:
+    - port: 8025
+      targetPort: 8025
+      protocol: TCP
+    selector:
+      app: rebalanceservice
+
+  # modelportfolio
+  modelportfolio:
+    name: modelportfolio
+    externalTrafficPolicy: Cluster
+    ports:
+    - port: 8015
+      targetPort: 8015
+      protocol: TCP
+    selector:
+      app: modelportfolio
+
+  # Notification Gen
+  notificationgen:
+    name: notificationgen
+    externalTrafficPolicy: Cluster
+    ports:
+    - port: 8060
+      targetPort: 8060
+      protocol: TCP
+    selector:
+      app: notificationgen
+
+  # robo Adavance Config
+  roboadvconfig:
+    name: roboadvconfig
+    externalTrafficPolicy: Cluster
+    ports:
+    - port: 8020
+      targetPort: 8020
+      protocol: TCP
+    selector:
+      app: roboadvconfig
+
+  # Schedular
+  schedular:
+    name: schedular
+    externalTrafficPolicy: Cluster
+    ports:
+    - port: 8040
+      targetPort: 8040
+      protocol: TCP
+    selector:
+      app: schedular
+
+  # Notification
+  notification:
+    name: notification
+    externalTrafficPolicy: Cluster
+    ports:
+    - port: 8055
+      targetPort: 8055
+      protocol: TCP
+    selector:
+      app: notification
+
+  # Risk Assessment
+  riskassessment:
+    name: riskassessment
+
+    externalTrafficPolicy: Cluster
+    ports:
+    - port: 8010
+      targetPort: 8010
+      protocol: TCP
+    selector:
+      app: riskassessment
+
+  # Financial Planning
+  financialpanning:
+    name: financialpanning
+    externalTrafficPolicy: Cluster
+    ports:
+    - port: 8065
+      targetPort: 8065
+      protocol: TCP
+    selector:
+      app: financialpanning
+
+  # Robo Billing
+  robobiling:
+    name: robobiling
+
+    externalTrafficPolicy: Cluster
+    ports:
+    - port: 8090
+      targetPort: 8090
+      protocol: TCP
+    selector:
+      app: robobiling
+
+  # simulation
+  simulation:
+    name: simulation
+
+    externalTrafficPolicy: Cluster
+    ports:
+    - port: 8050
+      targetPort: 8050
+      protocol: TCP
+    selector:
+      app: simulation
+
+#################### Target Group Bindings ##################
+
+#mobilebffservice 8100
+targetGroupBindings:
+  mobilebffservice-tgb:
+    name: mobilebffservice-tgb
+
+    serviceRef:
+      name: mobilebffservice
+      port: 8100
+    targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:337223210769:targetgroup/dev-robo-mobilebffservice/3a6d6f1873c9ee05
+  #tappenginesysteminterface 8035
+  tappenginesysteminterface:
+    name: tappenginesysteminterface-tgb
+
+    serviceRef:
+      name: tappenginesysteminterface
+      port: 8035
+    targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:337223210769:targetgroup/dev-robo-tappsysteminterface/fb54e2ebb67ea030
+  #rebalanceservice 8025
+  rebalanceservice:
+    name: rebalanceservice
+
+    serviceRef:
+      name: rebalanceservice
+      port: 8025
+    targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:337223210769:targetgroup/dev-robo-rebalanceservice/672c77d6e598784a
+  #modelportfolio 8015
+  modelportfolio:
+    name: modelportfolio
+
+    serviceRef:
+      name: modelportfolio
+      port: 8015
+    targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:337223210769:targetgroup/dev-robo-modelportfolio/37dc3b124431b876
+  #notificationgen 8060
+  notificationgen:
+    name: notificationgen
+
+    serviceRef:
+      name: notificationgen
+      port: 8060
+    targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:337223210769:targetgroup/dev-robo-notificationgen/b4a71edc5a4482b5
+  #roboadvconfig 8020
+  roboadvconfig:
+    name: roboadvconfig
+
+    serviceRef:
+      name: roboadvconfig
+      port: 8020
+    targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:337223210769:targetgroup/dev-robo-roboadvconfig/54e1ca4071d3cd6e
+  #schedular 8040
+  schedular:
+    name: schedular
+
+    serviceRef:
+      name: schedular
+      port: 8040
+    targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:337223210769:targetgroup/dev-robo-schedular/373caee7a3b51213
+  #notification 8055
+  notification:
+    name: notification
+
+    serviceRef:
+      name: notification
+      port: 8055
+    targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:337223210769:targetgroup/dev-robo-notification/d049031a1f88958f
+
+  #riskassessment 8010
+  riskassessment:
+    name: riskassessment
+
+    serviceRef:
+      name: riskassessment
+      port: 8010
+    targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:337223210769:targetgroup/dev-robo-riskassessment/42a2793dd859b0c6
+
+  #financialplanning 8065
+  financialplanning:
+    name: financialplanning
+
+    serviceRef:
+      name: financialplanning
+      port: 8065
+    targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:337223210769:targetgroup/dev-robo-financialplanning/878f43e319d21b88
+
+  #robobillservice
+  robobillservice:
+    name: robobillservice
+
+    serviceRef:
+      name: robobillservice
+      port: 8065
+    targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:337223210769:targetgroup/dev-robo-robobillservice/8376f2b6d273dbcd
+
+
+  #simulation
+  simulation:
+    name: simulation
+
+    serviceRef:
+      name: simulation
+      port: 8050
+    targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:337223210769:targetgroup/dev-robo-simulation/8b5529021c540bfa
