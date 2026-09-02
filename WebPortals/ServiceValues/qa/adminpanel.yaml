@@ -1,0 +1,25 @@
+# WebPortals — ServiceValues overlay for `adminpanel` in the `qa` environment.
+#
+# A THIN OVERLAY, not a standalone release. It carries only what differs for one
+# service and narrows the release to that service; everything else — the image
+# repository, ports, env, resources, the Service, the namespace — comes from the
+# StackValues file, which must be passed FIRST:
+#
+#   helm upgrade --install <release> ./WebPortals -n web-qa \
+#     -f WebPortals/StackValues/qa-values.yaml \
+#     -f WebPortals/ServiceValues/qa/adminpanel.yaml
+#
+# Passing this file on its own fails with an explanatory error, because the
+# service it selects is not defined by the values that are loaded.
+#
+# In CI, override the tag rather than editing this file:
+#   --set services.adminpanel.image.tag=$IMAGE_TAG
+
+serviceSelection:
+  include:
+    - adminpanel
+
+services:
+  adminpanel:
+    image:
+      tag: 'qa'

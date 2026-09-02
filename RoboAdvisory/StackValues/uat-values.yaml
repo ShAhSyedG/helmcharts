@@ -1,26 +1,49 @@
+# RoboAdvisory — StackValues for the `uat-values` environment.
+#
+# Complete, authoritative definition of every service in this environment.
+# Deploy the whole stack with:
+#
+#   helm upgrade --install <release> ./RoboAdvisory \
+#     -n uat -f RoboAdvisory/StackValues/uat-values.yaml
+#
+# To deploy a single service, layer its ServiceValues overlay on top of this
+# file; see RoboAdvisory/README.md.
+#
+# compatibility.render gates the four fields the previous templates silently
+# dropped. They are off so this refactor changes nothing on the first apply.
+# Enable them one environment at a time — see docs/values-contract.md.
+
 global:
   app:
-    version: "1.0"
     name: RoboAdvisory
+    version: '1.0'
     namespace: uat
-    imagePullSecrets: docker-secret
-deployment:
-  # dataprocessingservice
+  image:
+    registry: ''
+    pullPolicy: Always
+    pullSecrets:
+    - docker-secret
+compatibility:
+  render:
+    resources: false
+    probes: false
+    command: false
+    serviceAccountName: false
+services:
   dataprocessingservice:
-    image: organisation/robo_dataprocessingservice
-    tag: uat
+    image:
+      repository: organisation/robo_dataprocessingservice
+      tag: uat
+    replicas: 1
     env:
     - name: SPRING_PROFILES_ACTIVE
-      value: "awsuit"
+      value: awsuit
     ports:
     - containerPort: 8095
-    replicacount: 1
-    hpa:
-      enabled: true
-      minReplicas: 1
-      maxReplicas: 4
-      cpuUtilization: 80
-      memoryUtilization: 80
+    command:
+    - java
+    - -jar
+    - "/opt/app/*.jar"
     resources:
       limits:
         cpu: 800m
@@ -44,32 +67,23 @@ deployment:
       periodSeconds: 15
       timeoutSeconds: 5
       failureThreshold: 1
-    command:
-      commandDefinations:
-        command: ["java", "-jar", "/opt/app/*.jar"]
-
-################# Robo Services #############################
-
-services:
-  # dataprocessingservice
+    autoscaling:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 4
+      targetCPUUtilizationPercentage: 80
+      targetMemoryUtilizationPercentage: 80
+    service:
+      enabled: false
   mobilebffservice:
-    name: dataprocessingservice
-    externalTrafficPolicy: Cluster
-    ports:
-    - port: 8095
-      targetPort: 8095
-      protocol: TCP
-    selector:
-      app: dataprocessingservice
-
-#################### Target Group Bindings ##################
-
-#dataprocessingservice 8095
-targetGroupBindings:
-  dataprocessingservice-tgb:
-    name: dataprocessingservice-tgb
-
-    serviceRef:
+    service:
       name: dataprocessingservice
+      ports:
+      - port: 8095
+        targetPort: 8095
+        protocol: TCP
+    targetGroupBindings:
+    - name: dataprocessingservice-tgb
+      serviceName: dataprocessingservice
       port: 8095
-    targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:337223210769:targetgroup/uat-dataprocessing-tgb/fd8364d3bf900ad1
+      targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:337223210769:targetgroup/uat-dataprocessing-tgb/fd8364d3bf900ad1

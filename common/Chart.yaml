@@ -1,0 +1,9 @@
+apiVersion: v2
+name: common
+description: >-
+  Library chart shared by every stack chart in this repository. It owns all
+  rendering logic (Deployment, Service, HorizontalPodAutoscaler, Ingress,
+  TargetGroupBinding) so the stack charts contain only values and a single
+  include. It is a library chart and cannot be installed on its own.
+type: library
+version: 1.0.0

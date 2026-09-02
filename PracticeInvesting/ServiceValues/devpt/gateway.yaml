@@ -1,44 +1,25 @@
-global:
-  app:
-    version: '1.0'
-    name: practicetrading
-    namespace: production
-deployment:
-# Gateway
-  gateway:
-    image: tappeng/onboarding_gateway_pt
-    tag: dev
-    env:
-    - name: ASPNETCORE_ENVIRONMENT
-      value: "Development"    
-    ports:
-    - containerPort: 80
-    replicacount: 1
-    serviceAccountName: dev-sa
-    command:
-      commandDefinations:
-        command: ['sh', '-c', "dotnet Gateway.dll" ]
-    imagePullSecrets:
-      imageSecret: docker-secret
+# PracticeInvesting — ServiceValues overlay for `gateway` in the `devpt` environment.
+#
+# A THIN OVERLAY, not a standalone release. It carries only what differs for one
+# service and narrows the release to that service; everything else — the image
+# repository, ports, env, resources, the Service, the namespace — comes from the
+# StackValues file, which must be passed FIRST:
+#
+#   helm upgrade --install <release> ./PracticeInvesting -n dev-pt \
+#     -f PracticeInvesting/StackValues/devpt-values.yaml \
+#     -f PracticeInvesting/ServiceValues/devpt/gateway.yaml
+#
+# Passing this file on its own fails with an explanatory error, because the
+# service it selects is not defined by the values that are loaded.
+#
+# In CI, override the tag rather than editing this file:
+#   --set services.gateway.image.tag=$IMAGE_TAG
+
+serviceSelection:
+  include:
+    - gateway
+
 services:
   gateway:
-    name: gatewayservice
-    ports:
-    - name: grpc
-      protocol: TCP
-      port: 80
-      targetPort: 80
-      
-IngressRoute:
-  tenant-management-service:
-    hostname: 
-    - host: "tm-pt-live.tapengine.com"
-      http:
-        paths:
-        - pathType: Prefix
-          path: "/"
-          backend:
-            service:
-              name: tenantmanagementservice
-              port:
-                number: 80
+    image:
+      tag: 'dev'

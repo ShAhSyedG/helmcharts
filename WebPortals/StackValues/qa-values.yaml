@@ -1,54 +1,75 @@
+# WebPortals — StackValues for the `qa-values` environment.
+#
+# Complete, authoritative definition of every service in this environment.
+# Deploy the whole stack with:
+#
+#   helm upgrade --install <release> ./WebPortals \
+#     -n web-qa -f WebPortals/StackValues/qa-values.yaml
+#
+# To deploy a single service, layer its ServiceValues overlay on top of this
+# file; see WebPortals/README.md.
+#
+# compatibility.render gates the four fields the previous templates silently
+# dropped. They are off so this refactor changes nothing on the first apply.
+# Enable them one environment at a time — see docs/values-contract.md.
+
 global:
   app:
-    version: '1.0'
     name: adminpanel
+    version: '1.0'
     namespace: web-qa
-    imagePullSecrets: docker-secret
-    certificatearn: arn:aws:acm:us-east-1:123456789:certificate/b778ed01-2e09-4fb1-86ea-ac4f53fc12cd
-deployment:
-  adminpanel:
-    image: organisation/admin-portal
-    tag: qa
-    env:
-    - name: ENVIRONMENT
-      value: "QA"
-    ports:
-    - containerPort: 80
-    containerPort: 80
-    accessPort: 80
-    replicacount: 1
-
-
-
-#################### WEB SERVICES #########################
+  image:
+    registry: ''
+    pullPolicy: Always
+    pullSecrets:
+    - docker-secret
+  ingress:
+    className: alb
+    certificateArn: arn:aws:acm:us-east-1:123456789:certificate/b778ed01-2e09-4fb1-86ea-ac4f53fc12cd
+    annotations:
+      alb.ingress.kubernetes.io/scheme: internet-facing
+      alb.ingress.kubernetes.io/target-type: ip
+      alb.ingress.kubernetes.io/ssl-redirect: '443'
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
+      alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS",
+        "Port": "443", "StatusCode": "HTTP_301"}}'
+compatibility:
+  render:
+    resources: false
+    probes: false
+    command: false
+    serviceAccountName: false
 services:
   adminpanel:
-    name: livetrading-admin-service
+    image:
+      repository: organisation/admin-portal
+      tag: qa
+    replicas: 1
+    env:
+    - name: ENVIRONMENT
+      value: QA
     ports:
-    - name: https
-      protocol: TCP
-      port: 80
-      targetPort: 80
-    selector:
-      run: adminpanel
-
-##################### WEB INGRESSES ########################
-IngressRoute:
-  # Admin Panel App
-  adminpanel-qa:
-    hostname:
-    # Admin Panel Ingress
-    - host: furqan-test.organisationine.com
-      http:
+    - containerPort: 80
+    autoscaling:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 4
+      targetCPUUtilizationPercentage: 80
+      targetMemoryUtilizationPercentage: 80
+    service:
+      name: livetrading-admin-service
+      ports:
+      - name: https
+        protocol: TCP
+        port: 80
+        targetPort: 80
+    ingress:
+      enabled: true
+      name: adminpanel-qa-ingress
+      hosts:
+      - host: furqan-test.organisationine.com
         paths:
-        - path: /*
+        - path: "/*"
           pathType: ImplementationSpecific
-          backend:
-            service:
-              name: livetrading-admin-service
-              port:
-                number: 80
-
-
-
-
+          service: livetrading-admin-service
+          port: 80
