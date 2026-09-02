@@ -1,542 +1,49 @@
+# RoboAdvisory — StackValues for the `production-values` environment.
+#
+# Complete, authoritative definition of every service in this environment.
+# Deploy the whole stack with:
+#
+#   helm upgrade --install <release> ./RoboAdvisory \
+#     -n prod-robo -f RoboAdvisory/StackValues/production-values.yaml
+#
+# To deploy a single service, layer its ServiceValues overlay on top of this
+# file; see RoboAdvisory/README.md.
+#
+# compatibility.render gates the four fields the previous templates silently
+# dropped. They are off so this refactor changes nothing on the first apply.
+# Enable them one environment at a time — see docs/values-contract.md.
+
 global:
   app:
-    version: "1.0"
     name: RoboAdvisory
+    version: '1.0'
     namespace: prod-robo
-    imagePullSecrets: docker-secret
-deployment:
-  # mobilebffservice
-  mobilebffservice:
-    image: organisation/robo_mobilebffservice
-    tag: prod
-    env:
-    - name: SPRING_PROFILES_ACTIVE
-      value: "awsprod"
-    ports:
-    - containerPort: 8100
-    replicacount: 1
-    hpa:
-      enabled: true
-      minReplicas: 1
-      maxReplicas: 4
-      cpuUtilization: 80
-      memoryUtilization: 80
-    resources:
-      limits:
-        cpu: 800m
-        memory: 1000Mi
-      requests:
-        cpu: 500m
-        memory: 756Mi
-    readinessProbe:
-      httpGet:
-        path: /health/ok
-        port: 8100
-      initialDelaySeconds: 10
-      periodSeconds: 10
-      failureThreshold: 24
-      successThreshold: 1
-    livenessProbe:
-      httpGet:
-        path: /health/ok
-        port: 8100
-      initialDelaySeconds: 15
-      periodSeconds: 15
-      timeoutSeconds: 5
-      failureThreshold: 1
-    command:
-      commandDefinations:
-        command: ["java", "-jar", "/opt/app/*.jar"]
-
-  # organisationinesysteminterface
-  organisationinesysteminterface:
-    image: organisation/robo_organisationinesysteminterface
-    tag: prod
-    env:
-    - name: SPRING_PROFILES_ACTIVE
-      value: "awsprod"
-    ports:
-    - containerPort: 8035
-    replicacount: 1
-    hpa:
-      enabled: true
-      minReplicas: 1
-      maxReplicas: 4
-      cpuUtilization: 80
-      memoryUtilization: 80
-    resources:
-      limits:
-        cpu: 800m
-        memory: 1000Mi
-      requests:
-        cpu: 500m
-        memory: 756Mi
-    readinessProbe:
-      httpGet:
-        path: /health/ok
-        port: 8035
-      initialDelaySeconds: 10
-      periodSeconds: 10
-      failureThreshold: 24
-      successThreshold: 1
-    livenessProbe:
-      httpGet:
-        path: /health/ok
-        port: 8035
-      initialDelaySeconds: 15
-      periodSeconds: 15
-      timeoutSeconds: 5
-      failureThreshold: 1
-    command:
-      commandDefinations:
-        command: ["java", "-jar", "/opt/app/*.jar"]
-
-  # rebalance service
-  rebalanceservice:
-    image: organisation/robo_rebalanceservice
-    tag: prod
-    env:
-    - name: SPRING_PROFILES_ACTIVE
-      value: "awsprod"
-    ports:
-    - containerPort: 8025
-    replicacount: 1
-    hpa:
-      enabled: true
-      minReplicas: 1
-      maxReplicas: 4
-      cpuUtilization: 80
-      memoryUtilization: 80
-    resources:
-      limits:
-        cpu: 800m
-        memory: 1000Mi
-      requests:
-        cpu: 500m
-        memory: 756Mi
-    readinessProbe:
-      httpGet:
-        path: /health/ok
-        port: 8025
-      initialDelaySeconds: 10
-      periodSeconds: 10
-      failureThreshold: 24
-      successThreshold: 1
-    livenessProbe:
-      httpGet:
-        path: /health/ok
-        port: 8025
-      initialDelaySeconds: 15
-      periodSeconds: 15
-      timeoutSeconds: 5
-      failureThreshold: 1
-    command:
-      commandDefinations:
-        command: ["java", "-jar", "/opt/app/*.jar"]
-
-  # ModelPortfolio
-  modelportfolio:
-    image: organisation/robo_modelportfoliosysteminterface
-    tag: prod
-    env:
-    - name: SPRING_PROFILES_ACTIVE
-      value: "awsprod"
-    ports:
-    - containerPort: 8015
-    replicacount: 1
-    hpa:
-      enabled: true
-      minReplicas: 1
-      maxReplicas: 4
-      cpuUtilization: 80
-      memoryUtilization: 80
-    resources:
-      limits:
-        cpu: 800m
-        memory: 2000Mi
-      requests:
-        cpu: 500m
-        memory: 756Mi
-    readinessProbe:
-      httpGet:
-        path: /health/ok
-        port: 8015
-      initialDelaySeconds: 10
-      periodSeconds: 10
-      failureThreshold: 24
-      successThreshold: 1
-    livenessProbe:
-      httpGet:
-        path: /health/ok
-        port: 8015
-      initialDelaySeconds: 15
-      periodSeconds: 15
-      timeoutSeconds: 5
-      failureThreshold: 1
-    command:
-      commandDefinations:
-        command: ["java", "-jar", "/opt/app/*.jar"]
-
-  # Notification Gen
-  notificationgen:
-    image: organisation/notificationgen_service
-    tag: prod
-    env:
-    - name: SPRING_PROFILES_ACTIVE
-      value: "awsprod"
-    ports:
-    - containerPort: 8060
-    replicacount: 1
-    hpa:
-      enabled: true
-      minReplicas: 1
-      maxReplicas: 4
-      cpuUtilization: 80
-      memoryUtilization: 80
-    resources:
-      limits:
-        cpu: 800m
-        memory: 1000Mi
-      requests:
-        cpu: 500m
-        memory: 756Mi
-    readinessProbe:
-      httpGet:
-        path: /health/ok
-        port: 8060
-      initialDelaySeconds: 10
-      periodSeconds: 10
-      failureThreshold: 24
-      successThreshold: 1
-    livenessProbe:
-      httpGet:
-        path: /health/ok
-        port: 8060
-      initialDelaySeconds: 15
-      periodSeconds: 15
-      timeoutSeconds: 5
-      failureThreshold: 1
-    command:
-      commandDefinations:
-        command: ["java", "-jar", "/opt/app/*.jar"]
-
-  # robo Adavance Config
-  roboadvconfig:
-    image: organisation/robo_roboadvconfigservice
-    tag: prod
-    env:
-    - name: SPRING_PROFILES_ACTIVE
-      value: "awsprod"
-    ports:
-    - containerPort: 8020
-    replicacount: 1
-    hpa:
-      enabled: true
-      minReplicas: 1
-      maxReplicas: 4
-      cpuUtilization: 80
-      memoryUtilization: 80
-    resources:
-      limits:
-        cpu: 800m
-        memory: 1000Mi
-      requests:
-        cpu: 500m
-        memory: 756Mi
-    readinessProbe:
-      httpGet:
-        path: /health/ok
-        port: 8020
-      initialDelaySeconds: 10
-      periodSeconds: 10
-      failureThreshold: 24
-      successThreshold: 1
-    livenessProbe:
-      httpGet:
-        path: /health/ok
-        port: 8020
-      initialDelaySeconds: 15
-      periodSeconds: 15
-      timeoutSeconds: 5
-      failureThreshold: 1
-    command:
-      commandDefinations:
-        command: ["java", "-jar", "/opt/app/*.jar"]
-
-  # Schedular
-  schedular:
-    image: organisation/schedule_service
-    tag: prod
-    env:
-    - name: SPRING_PROFILES_ACTIVE
-      value: "awsprod"
-    ports:
-    - containerPort: 8040
-    replicacount: 1
-    hpa:
-      enabled: true
-      minReplicas: 1
-      maxReplicas: 4
-      cpuUtilization: 80
-      memoryUtilization: 80
-    resources:
-      limits:
-        cpu: 800m
-        memory: 2000Mi
-      requests:
-        cpu: 500m
-        memory: 756Mi
-    readinessProbe:
-      httpGet:
-        path: /health/ok
-        port: 8040
-      initialDelaySeconds: 10
-      periodSeconds: 10
-      failureThreshold: 24
-      successThreshold: 1
-    livenessProbe:
-      httpGet:
-        path: /health/ok
-        port: 8040
-      initialDelaySeconds: 15
-      periodSeconds: 15
-      timeoutSeconds: 5
-      failureThreshold: 1
-    command:
-      commandDefinations:
-        command: ["java", "-jar", "/opt/app/*.jar"]
-
-  # Investor
-  investor:
-    image: organisation/investor_service
-    tag: prod
-    env:
-    - name: SPRING_PROFILES_ACTIVE
-      value: "awsprod"
-    ports:
-    - containerPort: 8005
-    replicacount: 1
-    hpa:
-      enabled: true
-      minReplicas: 1
-      maxReplicas: 4
-      cpuUtilization: 80
-      memoryUtilization: 80
-    resources:
-      limits:
-        cpu: 800m
-        memory: 2000Mi
-      requests:
-        cpu: 500m
-        memory: 756Mi
-    readinessProbe:
-      httpGet:
-        path: /health/ok
-        port: 8005
-      initialDelaySeconds: 10
-      periodSeconds: 10
-      failureThreshold: 24
-      successThreshold: 1
-    livenessProbe:
-      httpGet:
-        path: /health/ok
-        port: 8005
-      initialDelaySeconds: 15
-      periodSeconds: 15
-      timeoutSeconds: 5
-      failureThreshold: 1
-    command:
-      commandDefinations:
-        commnad: ["java", "-jar", "/opt/app/*.jar"]
-
-  # Notification
-  notification:
-    image: organisation/notification_service
-    tag: prod
-    env:
-    - name: SPRING_PROFILES_ACTIVE
-      value: "awsprod"
-    ports:
-    - containerPort: 8055
-    replicacount: 1
-    hpa:
-      enabled: true
-      minReplicas: 1
-      maxReplicas: 4
-      cpuUtilization: 80
-      memoryUtilization: 80
-    resources:
-      limits:
-        cpu: 800m
-        memory: 1000Mi
-      requests:
-        cpu: 500m
-        memory: 756Mi
-    readinessProbe:
-      httpGet:
-        path: /health/ok
-        port: 8055
-      initialDelaySeconds: 10
-      periodSeconds: 10
-      failureThreshold: 24
-      successThreshold: 1
-    livenessProbe:
-      httpGet:
-        path: /health/ok
-        port: 8055
-      initialDelaySeconds: 15
-      periodSeconds: 15
-      timeoutSeconds: 5
-      failureThreshold: 1
-    command:
-      commandDefinations:
-        command: ["java", "-jar", "/opt/app/*.jar"]
-
-  # Risk Assessment
-  riskassessment:
-    image: organisation/robo_riskassessmentservice
-    tag: prod
-    env:
-    - name: SPRING_PROFILES_ACTIVE
-      value: "awsprod"
-    ports:
-    - containerPort: 8010
-    replicacount: 1
-    hpa:
-      enabled: true
-      minReplicas: 1
-      maxReplicas: 4
-      cpuUtilization: 80
-      memoryUtilization: 80
-    resources:
-      limits:
-        cpu: 800m
-        memory: 1000Mi
-      requests:
-        cpu: 500m
-        memory: 756Mi
-    readinessProbe:
-      httpGet:
-        path: /health/ok
-        port: 8010
-      initialDelaySeconds: 10
-      periodSeconds: 10
-      failureThreshold: 24
-      successThreshold: 1
-    livenessProbe:
-      httpGet:
-        path: /health/ok
-        port: 8010
-      initialDelaySeconds: 15
-      periodSeconds: 15
-      timeoutSeconds: 5
-      failureThreshold: 1
-    command:
-      commandDefinations:
-        command: ["java", "-jar", "/opt/app/*.jar"]
-
-  # Financial Planning
-  financialpanning:
-    image: organisation/financial_planning
-    tag: prod
-    env:
-    - name: SPRING_PROFILES_ACTIVE
-      value: "awsprod"
-    ports:
-    - containerPort: 8065
-    replicacount: 1
-    hpa:
-      enabled: true
-      minReplicas: 1
-      maxReplicas: 4
-      cpuUtilization: 80
-      memoryUtilization: 80
-    resources:
-      limits:
-        cpu: 800m
-        memory: 1000Mi
-      requests:
-        cpu: 500m
-        memory: 756Mi
-    readinessProbe:
-      httpGet:
-        path: /health/ok
-        port: 8065
-      initialDelaySeconds: 10
-      periodSeconds: 10
-      failureThreshold: 24
-      successThreshold: 1
-    livenessProbe:
-      httpGet:
-        path: /health/ok
-        port: 8065
-      initialDelaySeconds: 15
-      periodSeconds: 15
-      timeoutSeconds: 5
-      failureThreshold: 1
-    command:
-      commandDefinations:
-        command: ["java", "-jar", "/opt/app/*.jar"]
-
-  # Robo Billing
-  robobiling:
-    image: organisation/robo_billing
-    tag: prod
-    env:
-    - name: SPRING_PROFILES_ACTIVE
-      value: "awsprod"
-    ports:
-    - containerPort: 8090
-    replicacount: 1
-    hpa:
-      enabled: true
-      minReplicas: 1
-      maxReplicas: 4
-      cpuUtilization: 80
-      memoryUtilization: 80
-    resources:
-      limits:
-        cpu: 800m
-        memory: 1000Mi
-      requests:
-        cpu: 500m
-        memory: 756Mi
-    readinessProbe:
-      httpGet:
-        path: /health/ok
-        port: 8090
-      initialDelaySeconds: 10
-      periodSeconds: 10
-      failureThreshold: 24
-      successThreshold: 1
-    livenessProbe:
-      httpGet:
-        path: /health/ok
-        port: 8090
-      initialDelaySeconds: 15
-      periodSeconds: 15
-      timeoutSeconds: 5
-      failureThreshold: 1
-    command:
-      commandDefinations:
-        command: ["java", "-jar", "/opt/app/*.jar"]
-
-  # dataprocessingservice
+  image:
+    registry: ''
+    pullPolicy: Always
+    pullSecrets:
+    - docker-secret
+compatibility:
+  render:
+    resources: false
+    probes: false
+    command: false
+    serviceAccountName: false
+services:
   dataprocessingservice:
-    image: organisation/robo_dataprocessingservice
-    tag: prod
+    image:
+      repository: organisation/robo_dataprocessingservice
+      tag: prod
+    replicas: 1
     env:
     - name: SPRING_PROFILES_ACTIVE
-      value: "awsprod"
+      value: awsprod
     ports:
     - containerPort: 8095
-    replicacount: 1
-    hpa:
-      enabled: true
-      minReplicas: 1
-      maxReplicas: 4
-      cpuUtilization: 80
-      memoryUtilization: 80
+    command:
+    - java
+    - -jar
+    - "/opt/app/*.jar"
     resources:
       limits:
         cpu: 800m
@@ -560,26 +67,666 @@ deployment:
       periodSeconds: 15
       timeoutSeconds: 5
       failureThreshold: 1
-    command:
-      commandDefinations:
-        command: ["java", "-jar", "/opt/app/*.jar"]
-
-  # simulation
-  simulation:
-    image: organisation/robo_simulationservice
-    tag: prod
+    autoscaling:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 4
+      targetCPUUtilizationPercentage: 80
+      targetMemoryUtilizationPercentage: 80
+    service:
+      ports:
+      - port: 8095
+        targetPort: 8095
+        protocol: TCP
+    targetGroupBindings:
+    - name: dataprocessingservice-tgb
+      serviceName: dataprocessingservice
+      port: 8095
+      targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:711387122713:targetgroup/prod-dataprocessing-tgb/10c2c79c0d740f18
+  financialpanning:
+    image:
+      repository: organisation/financial_planning
+      tag: prod
+    replicas: 1
     env:
     - name: SPRING_PROFILES_ACTIVE
-      value: "awsprod"
+      value: awsprod
     ports:
-    - containerPort: 8050
-    replicacount: 1
-    hpa:
+    - containerPort: 8065
+    command:
+    - java
+    - -jar
+    - "/opt/app/*.jar"
+    resources:
+      limits:
+        cpu: 800m
+        memory: 1000Mi
+      requests:
+        cpu: 500m
+        memory: 756Mi
+    readinessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8065
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      failureThreshold: 24
+      successThreshold: 1
+    livenessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8065
+      initialDelaySeconds: 15
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 1
+    autoscaling:
       enabled: true
       minReplicas: 1
       maxReplicas: 4
-      cpuUtilization: 80
-      memoryUtilization: 80
+      targetCPUUtilizationPercentage: 80
+      targetMemoryUtilizationPercentage: 80
+    service:
+      ports:
+      - port: 8065
+        targetPort: 8065
+        protocol: TCP
+    targetGroupBindings:
+    - name: financialpanning
+      serviceName: financialpanning
+      port: 8065
+      targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:711387122713:targetgroup/financialplanning/4883f707d686d926
+  investor:
+    image:
+      repository: organisation/investor_service
+      tag: prod
+    replicas: 1
+    env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: awsprod
+    ports:
+    - containerPort: 8005
+    command:
+    - java
+    - -jar
+    - "/opt/app/*.jar"
+    resources:
+      limits:
+        cpu: 800m
+        memory: 2000Mi
+      requests:
+        cpu: 500m
+        memory: 756Mi
+    readinessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8005
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      failureThreshold: 24
+      successThreshold: 1
+    livenessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8005
+      initialDelaySeconds: 15
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 1
+    autoscaling:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 4
+      targetCPUUtilizationPercentage: 80
+      targetMemoryUtilizationPercentage: 80
+    service:
+      ports:
+      - port: 8005
+        targetPort: 8005
+        protocol: TCP
+  mobilebffservice:
+    image:
+      repository: organisation/robo_mobilebffservice
+      tag: prod
+    replicas: 1
+    env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: awsprod
+    ports:
+    - containerPort: 8100
+    command:
+    - java
+    - -jar
+    - "/opt/app/*.jar"
+    resources:
+      limits:
+        cpu: 800m
+        memory: 1000Mi
+      requests:
+        cpu: 500m
+        memory: 756Mi
+    readinessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8100
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      failureThreshold: 24
+      successThreshold: 1
+    livenessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8100
+      initialDelaySeconds: 15
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 1
+    autoscaling:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 4
+      targetCPUUtilizationPercentage: 80
+      targetMemoryUtilizationPercentage: 80
+    service:
+      ports:
+      - port: 8100
+        targetPort: 8100
+        protocol: TCP
+    targetGroupBindings:
+    - name: mobilebffservice-tgb
+      serviceName: mobilebffservice
+      port: 8100
+      targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:711387122713:targetgroup/mobilebffservice/f93b7457a98f8f6e
+  modelportfolio:
+    image:
+      repository: organisation/robo_modelportfoliosysteminterface
+      tag: prod
+    replicas: 1
+    env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: awsprod
+    ports:
+    - containerPort: 8015
+    command:
+    - java
+    - -jar
+    - "/opt/app/*.jar"
+    resources:
+      limits:
+        cpu: 800m
+        memory: 2000Mi
+      requests:
+        cpu: 500m
+        memory: 756Mi
+    readinessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8015
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      failureThreshold: 24
+      successThreshold: 1
+    livenessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8015
+      initialDelaySeconds: 15
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 1
+    autoscaling:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 4
+      targetCPUUtilizationPercentage: 80
+      targetMemoryUtilizationPercentage: 80
+    service:
+      ports:
+      - port: 8015
+        targetPort: 8015
+        protocol: TCP
+    targetGroupBindings:
+    - name: modelportfolio
+      serviceName: modelportfolio
+      port: 8015
+      targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:711387122713:targetgroup/modelportfolio/ef111da53292396c
+  notification:
+    image:
+      repository: organisation/notification_service
+      tag: prod
+    replicas: 1
+    env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: awsprod
+    ports:
+    - containerPort: 8055
+    command:
+    - java
+    - -jar
+    - "/opt/app/*.jar"
+    resources:
+      limits:
+        cpu: 800m
+        memory: 1000Mi
+      requests:
+        cpu: 500m
+        memory: 756Mi
+    readinessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8055
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      failureThreshold: 24
+      successThreshold: 1
+    livenessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8055
+      initialDelaySeconds: 15
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 1
+    autoscaling:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 4
+      targetCPUUtilizationPercentage: 80
+      targetMemoryUtilizationPercentage: 80
+    service:
+      ports:
+      - port: 8055
+        targetPort: 8055
+    targetGroupBindings:
+    - name: notification
+      serviceName: notification
+      port: 8055
+      targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:711387122713:targetgroup/notification/3e3590ac38850fa5
+  notificationgen:
+    image:
+      repository: organisation/notificationgen_service
+      tag: prod
+    replicas: 1
+    env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: awsprod
+    ports:
+    - containerPort: 8060
+    command:
+    - java
+    - -jar
+    - "/opt/app/*.jar"
+    resources:
+      limits:
+        cpu: 800m
+        memory: 1000Mi
+      requests:
+        cpu: 500m
+        memory: 756Mi
+    readinessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8060
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      failureThreshold: 24
+      successThreshold: 1
+    livenessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8060
+      initialDelaySeconds: 15
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 1
+    autoscaling:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 4
+      targetCPUUtilizationPercentage: 80
+      targetMemoryUtilizationPercentage: 80
+    service:
+      ports:
+      - port: 8060
+        targetPort: 8060
+        protocol: TCP
+    targetGroupBindings:
+    - name: notificationgen
+      serviceName: notificationgen
+      port: 8060
+      targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:711387122713:targetgroup/notificationgen/6500099c5d0d9f52
+  organisationinesysteminterface:
+    image:
+      repository: organisation/robo_organisationinesysteminterface
+      tag: prod
+    replicas: 1
+    env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: awsprod
+    ports:
+    - containerPort: 8035
+    command:
+    - java
+    - -jar
+    - "/opt/app/*.jar"
+    resources:
+      limits:
+        cpu: 800m
+        memory: 1000Mi
+      requests:
+        cpu: 500m
+        memory: 756Mi
+    readinessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8035
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      failureThreshold: 24
+      successThreshold: 1
+    livenessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8035
+      initialDelaySeconds: 15
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 1
+    autoscaling:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 4
+      targetCPUUtilizationPercentage: 80
+      targetMemoryUtilizationPercentage: 80
+    service:
+      ports:
+      - port: 8035
+        targetPort: 8035
+        protocol: TCP
+    targetGroupBindings:
+    - name: organisationinesysteminterface-tgb
+      serviceName: organisationinesysteminterface
+      port: 8035
+      targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:711387122713:targetgroup/organisationinesysteminterface/5d662864ebcc8f7b
+  rebalanceservice:
+    image:
+      repository: organisation/robo_rebalanceservice
+      tag: prod
+    replicas: 1
+    env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: awsprod
+    ports:
+    - containerPort: 8025
+    command:
+    - java
+    - -jar
+    - "/opt/app/*.jar"
+    resources:
+      limits:
+        cpu: 800m
+        memory: 1000Mi
+      requests:
+        cpu: 500m
+        memory: 756Mi
+    readinessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8025
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      failureThreshold: 24
+      successThreshold: 1
+    livenessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8025
+      initialDelaySeconds: 15
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 1
+    autoscaling:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 4
+      targetCPUUtilizationPercentage: 80
+      targetMemoryUtilizationPercentage: 80
+    service:
+      ports:
+      - port: 8025
+        targetPort: 8025
+        protocol: TCP
+    targetGroupBindings:
+    - name: rebalanceservice
+      serviceName: rebalanceservice
+      port: 8025
+      targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:711387122713:targetgroup/rebalanceservice/cefe4babe3d64def
+  riskassessment:
+    image:
+      repository: organisation/robo_riskassessmentservice
+      tag: prod
+    replicas: 1
+    env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: awsprod
+    ports:
+    - containerPort: 8010
+    command:
+    - java
+    - -jar
+    - "/opt/app/*.jar"
+    resources:
+      limits:
+        cpu: 800m
+        memory: 1000Mi
+      requests:
+        cpu: 500m
+        memory: 756Mi
+    readinessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8010
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      failureThreshold: 24
+      successThreshold: 1
+    livenessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8010
+      initialDelaySeconds: 15
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 1
+    autoscaling:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 4
+      targetCPUUtilizationPercentage: 80
+      targetMemoryUtilizationPercentage: 80
+    service:
+      ports:
+      - port: 8010
+        targetPort: 8010
+        protocol: TCP
+    targetGroupBindings:
+    - name: riskassessment
+      serviceName: riskassessment
+      port: 8010
+      targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:711387122713:targetgroup/riskassessment/5a6b2ece065adad5
+  roboadvconfig:
+    image:
+      repository: organisation/robo_roboadvconfigservice
+      tag: prod
+    replicas: 1
+    env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: awsprod
+    ports:
+    - containerPort: 8020
+    command:
+    - java
+    - -jar
+    - "/opt/app/*.jar"
+    resources:
+      limits:
+        cpu: 800m
+        memory: 1000Mi
+      requests:
+        cpu: 500m
+        memory: 756Mi
+    readinessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8020
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      failureThreshold: 24
+      successThreshold: 1
+    livenessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8020
+      initialDelaySeconds: 15
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 1
+    autoscaling:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 4
+      targetCPUUtilizationPercentage: 80
+      targetMemoryUtilizationPercentage: 80
+    service:
+      ports:
+      - port: 8020
+        targetPort: 8020
+        protocol: TCP
+    targetGroupBindings:
+    - name: roboadvconfig
+      serviceName: roboadvconfig
+      port: 8020
+      targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:711387122713:targetgroup/roboadvconfig/33b280c47d32ca5f
+  robobiling:
+    image:
+      repository: organisation/robo_billing
+      tag: prod
+    replicas: 1
+    env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: awsprod
+    ports:
+    - containerPort: 8090
+    command:
+    - java
+    - -jar
+    - "/opt/app/*.jar"
+    resources:
+      limits:
+        cpu: 800m
+        memory: 1000Mi
+      requests:
+        cpu: 500m
+        memory: 756Mi
+    readinessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8090
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      failureThreshold: 24
+      successThreshold: 1
+    livenessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8090
+      initialDelaySeconds: 15
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 1
+    autoscaling:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 4
+      targetCPUUtilizationPercentage: 80
+      targetMemoryUtilizationPercentage: 80
+    service:
+      ports:
+      - port: 8090
+        targetPort: 8090
+        protocol: TCP
+    targetGroupBindings:
+    - name: robobiling
+      serviceName: robobiling
+      port: 8090
+      targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:711387122713:targetgroup/robobilling/b3ccf356123d698a
+  schedular:
+    image:
+      repository: organisation/schedule_service
+      tag: prod
+    replicas: 1
+    env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: awsprod
+    ports:
+    - containerPort: 8040
+    command:
+    - java
+    - -jar
+    - "/opt/app/*.jar"
+    resources:
+      limits:
+        cpu: 800m
+        memory: 2000Mi
+      requests:
+        cpu: 500m
+        memory: 756Mi
+    readinessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8040
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      failureThreshold: 24
+      successThreshold: 1
+    livenessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8040
+      initialDelaySeconds: 15
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 1
+    autoscaling:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 4
+      targetCPUUtilizationPercentage: 80
+      targetMemoryUtilizationPercentage: 80
+    service:
+      ports:
+      - port: 8040
+        targetPort: 8040
+        protocol: TCP
+    targetGroupBindings:
+    - name: schedular
+      serviceName: schedular
+      port: 8040
+      targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:711387122713:targetgroup/schedular/a40d5dd69c461ee2
+  simulation:
+    image:
+      repository: organisation/robo_simulationservice
+      tag: prod
+    replicas: 1
+    env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: awsprod
+    ports:
+    - containerPort: 8050
+    command:
+    - java
+    - -jar
+    - "/opt/app/*.jar"
     resources:
       limits:
         cpu: 800m
@@ -603,267 +750,19 @@ deployment:
       periodSeconds: 15
       timeoutSeconds: 5
       failureThreshold: 1
-    command:
-      commandDefinations:
-        command: ["java", "-jar", "/opt/app/*.jar"]
-################# Robo Services #############################
-
-services:
-  # mobilebffservice
-  mobilebffservice:
-    name: mobilebffservice
-    externalTrafficPolicy: Cluster
-    ports:
-    - port: 8100
-      targetPort: 8100
-      protocol: TCP
-    selector:
-      app: mobilebffservice
-
-  # organisationinesysteminterface
-  organisationinesysteminterface:
-    name: organisationinesysteminterface
-
-    externalTrafficPolicy: Cluster
-    ports:
-    - port: 8035
-      targetPort: 8035
-      protocol: TCP
-    selector:
-      app: organisationinesysteminterface
-
-  # Rebalance Service
-  rebalanceservice:
-    name: rebalanceservice
-    externalTrafficPolicy: Cluster
-    ports:
-    - port: 8025
-      targetPort: 8025
-      protocol: TCP
-    selector:
-      app: rebalanceservice
-
-  # modelportfolio
-  modelportfolio:
-    name: modelportfolio
-    externalTrafficPolicy: Cluster
-    ports:
-    - port: 8015
-      targetPort: 8015
-      protocol: TCP
-    selector:
-      app: modelportfolio
-
-  # Notification Gen
-  notificationgen:
-    name: notificationgen
-    externalTrafficPolicy: Cluster
-    ports:
-    - port: 8060
-      targetPort: 8060
-      protocol: TCP
-    selector: notificationgen
-
-  # robo Adavance Config
-  roboadvconfig:
-    name: roboadvconfig
-    externalTrafficPolicy: Cluster
-    ports:
-    - port: 8020
-      targetPort: 8020
-      protocol: TCP
-    selector: roboadvconfig
-
-  # Schedular
-  schedular:
-    name: schedular
-    externalTrafficPolicy: Cluster
-    ports:
-    - port: 8040
-      targetPort: 8040
-      protocol: TCP
-    selector: schedular
-
-  # Investor
-  investor:
-    name: investor
-    externalTrafficPolicy: Cluster
-    ports:
-    - port: 8005
-      targetPort: 8005
-      protocol: TCP
-    selector: investor
-
-  # Notification
-  notification:
-    name: notification
-    externalTrafficPolicy: Cluster
-    ports:
-    - port: 8055
-      targetPort: 8055
-  # Risk Assessment
-  riskassessment:
-    name: riskassessment
-
-    externalTrafficPolicy: Cluster
-    ports:
-    - port: 8010
-      targetPort: 8010
-      protocol: TCP
-    selector: riskassessment
-
-  # Financial Planning
-  financialpanning:
-    name: financialpanning
-
-    externalTrafficPolicy: Cluster
-    ports:
-    - port: 8065
-      targetPort: 8065
-      protocol: TCP
-    selector: financialpanning
-
-  # Robo Billing
-  robobiling:
-    name: robobiling
-
-    externalTrafficPolicy: Cluster
-    ports:
-    - port: 8090
-      targetPort: 8090
-      protocol: TCP
-    selector: robobiling
-
-  # dataprocessingservice
-  dataprocessingservice:
-    name: dataprocessingservice
-    externalTrafficPolicy: Cluster
-    ports:
-    - port: 8095
-      targetPort: 8095
-      protocol: TCP
-    selector:
-      app: dataprocessingservice
-
-  # dataprocessingservice
-  simulation:
-    name: simulation
-    externalTrafficPolicy: Cluster
-    ports:
-    - port: 8050
-      targetPort: 8050
-      protocol: TCP
-    selector:
-      app: simulation
-
-#################### Target Group Bindings ##################
-
-#mobilebffservice 8100
-targetGroupBindings:
-  mobilebffservice-tgb:
-    name: mobilebffservice-tgb
-
-    serviceRef:
-      name: mobilebffservice
-      port: 8100
-    targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:711387122713:targetgroup/mobilebffservice/f93b7457a98f8f6e
-  #organisationinesysteminterface 8035
-  organisationinesysteminterface:
-    name: organisationinesysteminterface-tgb
-
-    serviceRef:
-      name: organisationinesysteminterface
-      port: 8035
-    targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:711387122713:targetgroup/organisationinesysteminterface/5d662864ebcc8f7b
-  #rebalanceservice 8025
-  rebalanceservice:
-    name: rebalanceservice
-
-    serviceRef:
-      name: rebalanceservice
-      port: 8025
-    targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:711387122713:targetgroup/rebalanceservice/cefe4babe3d64def
-  #modelportfolio 8015
-  modelportfolio:
-    name: modelportfolio
-
-    serviceRef:
-      name: modelportfolio
-      port: 8015
-    targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:711387122713:targetgroup/modelportfolio/ef111da53292396c
-  #notificationgen 8060
-  notificationgen:
-    name: notificationgen
-
-    serviceRef:
-      name: notificationgen
-      port: 8060
-    targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:711387122713:targetgroup/notificationgen/6500099c5d0d9f52
-  #roboadvconfig 8020
-  roboadvconfig:
-    name: roboadvconfig
-
-    serviceRef:
-      name: roboadvconfig
-      port: 8020
-    targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:711387122713:targetgroup/roboadvconfig/33b280c47d32ca5f
-  #schedular 8040
-  schedular:
-    name: schedular
-
-    serviceRef:
-      name: schedular
-      port: 8040
-    targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:711387122713:targetgroup/schedular/a40d5dd69c461ee2
-  #notification 8055
-  notification:
-    name: notification
-
-    serviceRef:
-      name: notification
-      port: 8055
-    targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:711387122713:targetgroup/notification/3e3590ac38850fa5
-
-  #riskassessment 8010
-  riskassessment:
-    name: riskassessment
-
-    serviceRef:
-      name: riskassessment
-      port: 8010
-    targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:711387122713:targetgroup/riskassessment/5a6b2ece065adad5
-
-  #financialplanning 8065
-  financialpanning:
-    name: financialpanning
-    serviceRef:
-      name: financialpanning
-      port: 8065
-    targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:711387122713:targetgroup/financialplanning/4883f707d686d926
-
-  #robo billing 8090
-  robobiling:
-    name: robobiling
-    serviceRef:
-      name: robobiling
-      port: 8090
-    targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:711387122713:targetgroup/robobilling/b3ccf356123d698a
-
-  #dataprocessingservice 8095
-  dataprocessingservice-tgb:
-    name: dataprocessingservice-tgb
-
-    serviceRef:
-      name: dataprocessingservice
-      port: 8095
-    targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:711387122713:targetgroup/prod-dataprocessing-tgb/10c2c79c0d740f18
-
-
-  #dataprocessingservice 8095
-  simulation-tgb:
-    name: simulation-tgb
-
-    serviceRef:
-      name: simulation
+    autoscaling:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 4
+      targetCPUUtilizationPercentage: 80
+      targetMemoryUtilizationPercentage: 80
+    service:
+      ports:
+      - port: 8050
+        targetPort: 8050
+        protocol: TCP
+    targetGroupBindings:
+    - name: simulation-tgb
+      serviceName: simulation
       port: 8050
-    targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:711387122713:targetgroup/simulation/1309f949ff30834f
+      targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:711387122713:targetgroup/simulation/1309f949ff30834f

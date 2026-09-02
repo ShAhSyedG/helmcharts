@@ -1,66 +1,48 @@
+# LiveInvest — StackValues for the `dev-values` environment.
+#
+# Complete, authoritative definition of every service in this environment.
+# Deploy the whole stack with:
+#
+#   helm upgrade --install <release> ./LiveInvest \
+#     -n dev-lt -f LiveInvest/StackValues/dev-values.yaml
+#
+# To deploy a single service, layer its ServiceValues overlay on top of this
+# file; see LiveInvest/README.md.
+#
+# compatibility.render gates the four fields the previous templates silently
+# dropped. They are off so this refactor changes nothing on the first apply.
+# Enable them one environment at a time — see docs/values-contract.md.
+
 global:
   app:
-    version: "1.0"
     name: LiveInvesting
+    version: '1.0'
     namespace: dev-lt
-    imagePullSecrets: docker-secret
-deployment:
-  # trade position service
-  tradepositionservice:
-    image: organisation/onboarding_tradeposition_service_lt
-    tag: dev
+  image:
+    registry: ''
+    pullPolicy: Always
+    pullSecrets:
+    - docker-secret
+compatibility:
+  render:
+    resources: false
+    probes: false
+    command: false
+    serviceAccountName: false
+services:
+  accountopening-grpcservice:
+    image:
+      repository: organisation/onboarding_accountopening_grpc
+      tag: dev
+    replicas: 1
     env:
     - name: ASPNETCORE_ENVIRONMENT
-      value: "Development"
-    ports:
-    - containerPort: 9000
-    replicacount: 1
-    hpa:
-      enabled: true
-      minReplicas: 1
-      maxReplicas: 2
-      cpuUtilization: 80
-      memoryUtilization: 80
-    resources:
-      limits:
-        cpu: 800m
-        memory: 900Mi
-      requests:
-        cpu: 500m
-        memory: 756Mi
-    readinessProbe:
-      httpGet:
-        path: /health/ok
-        port: 9000
-      initialDelaySeconds: 10
-      periodSeconds: 10
-      failureThreshold: 24
-      successThreshold: 1
-    livenessProbe:
-      httpGet:
-        path: /health/ok
-        port: 9000
-      initialDelaySeconds: 15
-      periodSeconds: 15
-      timeoutSeconds: 5
-      failureThreshold: 1
-
-  # autotrade - new - deployment
-  autotrade-new-service:
-    image: organisation/onboarding_new_autotrade_lt
-    tag: dev
-    env:
-    - name: ASPNETCORE_ENVIRONMENT
-      value: "Development"
+      value: Development
     ports:
     - containerPort: 80
-    replicacount: 1
-    hpa:
-      enabled: true
-      minReplicas: 1
-      maxReplicas: 2
-      cpuUtilization: 80
-      memoryUtilization: 80
+    command:
+    - dotnet
+    - AccountOpening.GRPC.dll
     resources:
       limits:
         cpu: 800m
@@ -84,27 +66,32 @@ deployment:
       periodSeconds: 15
       timeoutSeconds: 5
       failureThreshold: 1
-    command:
-      commandDefinations:
-        command: [ "dotnet", "AutoTrade.WebApi.dll" ]
-
-  # account - opening - deployment
+    autoscaling:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 2
+      targetCPUUtilizationPercentage: 80
+      targetMemoryUtilizationPercentage: 80
+    service:
+      name: accountopening-grpc-service
+      ports:
+      - port: 7133
+        targetPort: 80
+        protocol: TCP
   accountopeningservice:
-    image: organisation/onboarding_accountopening_lt
-    tag: dev
+    image:
+      repository: organisation/onboarding_accountopening_lt
+      tag: dev
+    replicas: 1
     env:
     - name: ASPNETCORE_ENVIRONMENT
-      value: "Development"
+      value: Development
     ports:
     - containerPort: 80
       protocol: TCP
-    replicacount: 1
-    hpa:
-      enabled: true
-      minReplicas: 1
-      maxReplicas: 2
-      cpuUtilization: 80
-      memoryUtilization: 80
+    command:
+    - dotnet
+    - AccountOpening.WebApi.dll
     resources:
       limits:
         cpu: 800m
@@ -128,26 +115,31 @@ deployment:
       periodSeconds: 15
       timeoutSeconds: 5
       failureThreshold: 1
-    command:
-      commandDefinations:
-        command: [ "dotnet", "AccountOpening.WebApi.dll" ]
-
-  # accountopening-grpc-deployment
-  accountopening-grpcservice:
-    image: organisation/onboarding_accountopening_grpc
-    tag: dev
+    autoscaling:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 2
+      targetCPUUtilizationPercentage: 80
+      targetMemoryUtilizationPercentage: 80
+    service:
+      name: accountopening-service
+      ports:
+      - port: 7079
+        targetPort: 80
+        protocol: TCP
+  autotrade-new-service:
+    image:
+      repository: organisation/onboarding_new_autotrade_lt
+      tag: dev
+    replicas: 1
     env:
     - name: ASPNETCORE_ENVIRONMENT
-      value: "Development"
+      value: Development
     ports:
     - containerPort: 80
-    replicacount: 1
-    hpa:
-      enabled: true
-      minReplicas: 1
-      maxReplicas: 2
-      cpuUtilization: 80
-      memoryUtilization: 80
+    command:
+    - dotnet
+    - AutoTrade.WebApi.dll
     resources:
       limits:
         cpu: 800m
@@ -171,26 +163,30 @@ deployment:
       periodSeconds: 15
       timeoutSeconds: 5
       failureThreshold: 1
-    command:
-      commandDefinations:
-        command: [ "dotnet", "AccountOpening.GRPC.dll" ]
-
-  # transactions-new-deployment
-  transactions-new-service:
-    image: organisation/onboarding_new_transactions_lt
-    tag: dev
+    autoscaling:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 2
+      targetCPUUtilizationPercentage: 80
+      targetMemoryUtilizationPercentage: 80
+    service:
+      ports:
+      - port: 7220
+        targetPort: 80
+        protocol: TCP
+  operations-service:
+    image:
+      repository: organisation/onboarding_operations_lt
+      tag: dev
+    replicas: 1
     env:
     - name: ASPNETCORE_ENVIRONMENT
-      value: "Development"
+      value: Development
     ports:
     - containerPort: 80
-    replicacount: 1
-    hpa:
-      enabled: true
-      minReplicas: 1
-      maxReplicas: 2
-      cpuUtilization: 80
-      memoryUtilization: 80
+    command:
+    - dotnet
+    - Operations.WebApi.dll
     resources:
       limits:
         cpu: 800m
@@ -214,26 +210,30 @@ deployment:
       periodSeconds: 15
       timeoutSeconds: 5
       failureThreshold: 1
-    command:
-      commandDefinations:
-        command: [ "dotnet", "Transaction.WebApi.dll" ]
-
-  # sdtrade-new-deployment
+    autoscaling:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 2
+      targetCPUUtilizationPercentage: 80
+      targetMemoryUtilizationPercentage: 80
+    service:
+      ports:
+      - port: 7078
+        targetPort: 80
+        protocol: TCP
   sdtradeservice:
-    image: organisation/onboarding_sdtrade_lt
-    tag: dev
+    image:
+      repository: organisation/onboarding_sdtrade_lt
+      tag: dev
+    replicas: 1
     env:
     - name: ASPNETCORE_ENVIRONMENT
-      value: "Development"
+      value: Development
     ports:
     - containerPort: 80
-    replicacount: 1
-    hpa:
-      enabled: true
-      minReplicas: 1
-      maxReplicas: 2
-      cpuUtilization: 80
-      memoryUtilization: 80
+    command:
+    - dotnet
+    - Trade.WebApi.dll
     resources:
       limits:
         cpu: 800m
@@ -257,26 +257,30 @@ deployment:
       periodSeconds: 15
       timeoutSeconds: 5
       failureThreshold: 1
-    command:
-      commandDefinations:
-        command: [ "dotnet", "Trade.WebApi.dll" ]
-
-  #tradeexecution-new-service
+    autoscaling:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 2
+      targetCPUUtilizationPercentage: 80
+      targetMemoryUtilizationPercentage: 80
+    service:
+      ports:
+      - port: 8182
+        targetPort: 80
+        protocol: TCP
   tradeexecution-new-service:
-    image: organisation/onboarding_new_trade_execution_lt
-    tag: dev
+    image:
+      repository: organisation/onboarding_new_trade_execution_lt
+      tag: dev
+    replicas: 1
     env:
     - name: ASPNETCORE_ENVIRONMENT
-      value: "Development"
+      value: Development
     ports:
     - containerPort: 8080
-    replicacount: 1
-    hpa:
-      enabled: true
-      minReplicas: 1
-      maxReplicas: 2
-      cpuUtilization: 80
-      memoryUtilization: 80
+    command:
+    - dotnet
+    - Trade.ExecutionReport.dll
     resources:
       limits:
         cpu: 800m
@@ -300,25 +304,30 @@ deployment:
       periodSeconds: 15
       timeoutSeconds: 5
       failureThreshold: 1
-    command:
-      commandDefinations:
-        command: [ "dotnet", "Trade.ExecutionReport.dll" ]
-  #tradeposition-new-service
+    autoscaling:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 2
+      targetCPUUtilizationPercentage: 80
+      targetMemoryUtilizationPercentage: 80
+    service:
+      ports:
+      - port: 8080
+        targetPort: 8080
+        protocol: TCP
   tradeposition-new-service:
-    image: organisation/onboarding_new_trade_position_lt
-    tag: dev
+    image:
+      repository: organisation/onboarding_new_trade_position_lt
+      tag: dev
+    replicas: 1
     env:
     - name: ASPNETCORE_ENVIRONMENT
-      value: "Development"
+      value: Development
     ports:
     - containerPort: 8081
-    replicacount: 1
-    hpa:
-      enabled: true
-      minReplicas: 1
-      maxReplicas: 2
-      cpuUtilization: 80
-      memoryUtilization: 80
+    command:
+    - dotnet
+    - Trade.PositionService.dll
     resources:
       limits:
         cpu: 800m
@@ -342,25 +351,74 @@ deployment:
       periodSeconds: 15
       timeoutSeconds: 5
       failureThreshold: 1
-    command:
-      commandDefinations:
-        command: [ "dotnet", "Trade.PositionService.dll" ]
-  #traderecurring-new-service
-  traderecurring-new-service:
-    image: organisation/onboarding_new_trade_recurring_lt
-    tag: dev
+    autoscaling:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 2
+      targetCPUUtilizationPercentage: 80
+      targetMemoryUtilizationPercentage: 80
+    service:
+      ports:
+      - port: 8081
+        targetPort: 8081
+        protocol: TCP
+  tradepositionservice:
+    image:
+      repository: organisation/onboarding_tradeposition_service_lt
+      tag: dev
+    replicas: 1
     env:
     - name: ASPNETCORE_ENVIRONMENT
-      value: "Development"
+      value: Development
+    ports:
+    - containerPort: 9000
+    resources:
+      limits:
+        cpu: 800m
+        memory: 900Mi
+      requests:
+        cpu: 500m
+        memory: 756Mi
+    readinessProbe:
+      httpGet:
+        path: /health/ok
+        port: 9000
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      failureThreshold: 24
+      successThreshold: 1
+    livenessProbe:
+      httpGet:
+        path: /health/ok
+        port: 9000
+      initialDelaySeconds: 15
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 1
+    autoscaling:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 2
+      targetCPUUtilizationPercentage: 80
+      targetMemoryUtilizationPercentage: 80
+    service:
+      ports:
+      - port: 9000
+        targetPort: 9000
+        protocol: TCP
+  traderecurring-new-service:
+    image:
+      repository: organisation/onboarding_new_trade_recurring_lt
+      tag: dev
+    replicas: 1
+    env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: Development
     ports:
     - containerPort: 8082
-    replicacount: 1
-    hpa:
-      enabled: true
-      minReplicas: 1
-      maxReplicas: 2
-      cpuUtilization: 80
-      memoryUtilization: 80
+    command:
+    - dotnet
+    - Trade.Recurring.dll
     resources:
       limits:
         cpu: 800m
@@ -384,25 +442,30 @@ deployment:
       periodSeconds: 15
       timeoutSeconds: 5
       failureThreshold: 1
-    command:
-      commandDefinations:
-        command: [ "dotnet", "Trade.Recurring.dll" ]
-
-  operations-service:
-    image: organisation/onboarding_operations_lt
-    tag: dev
+    autoscaling:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 2
+      targetCPUUtilizationPercentage: 80
+      targetMemoryUtilizationPercentage: 80
+    service:
+      ports:
+      - port: 8082
+        targetPort: 8082
+        protocol: TCP
+  transactions-new-service:
+    image:
+      repository: organisation/onboarding_new_transactions_lt
+      tag: dev
+    replicas: 1
     env:
     - name: ASPNETCORE_ENVIRONMENT
-      value: "Development"
+      value: Development
     ports:
     - containerPort: 80
-    replicacount: 1
-    hpa:
-      enabled: true
-      minReplicas: 1
-      maxReplicas: 2
-      cpuUtilization: 80
-      memoryUtilization: 80
+    command:
+    - dotnet
+    - Transaction.WebApi.dll
     resources:
       limits:
         cpu: 800m
@@ -426,109 +489,14 @@ deployment:
       periodSeconds: 15
       timeoutSeconds: 5
       failureThreshold: 1
-    command:
-      commandDefinations:
-        command: [ "dotnet", "Operations.WebApi.dll" ]
-  ################# Live Invest Services #############################
-
-services:
-  # tradepositionservice
-  tradepositionservice:
-    name: tradepositionservice
-
-    ports:
-    - port: 9000
-      targetPort: 9000
-      protocol: TCP
-    selector:
-      run: tradepositionservice
-
-  # autotrade-new-service
-  autotrade-new-service:
-    name: autotrade-new-service
-    ports:
-    - port: 7220
-      targetPort: 80
-      protocol: TCP
-    selector:
-      run: autotrade-new-service
-
-  # accountopening-service
-  accountopeningservice:
-    name: accountopening-service
-    ports:
-    - port: 7079
-      targetPort: 80
-      protocol: TCP
-    selector:
-      run: accountopeningservice
-
-  # accountopening - grpc -service
-  accountopening-grpcservice:
-    name: accountopening-grpc-service
-    ports:
-    - port: 7133
-      targetPort: 80
-      protocol: TCP
-    selector:
-      run: accountopening-grpcservice
-
-  # transactions-new-service
-  transactions-new-service:
-    name: transactions-new-service
-    ports:
-    - port: 7252
-      targetPort: 80
-      protocol: TCP
-    selector:
-      run: transactions-new-service
-
-  # sdtrade - service
-  sdtradeservice:
-    name: sdtradeservice
-    ports:
-    - port: 8182
-      targetPort: 80
-      protocol: TCP
-    selector:
-      run: sdtradeservice
-
-  #tradeexecution-new-service
-  tradeexecution-new-service:
-    name: tradeexecution-new-service
-    ports:
-    - port: 8080
-      targetPort: 8080
-      protocol: TCP
-    selector:
-      run: tradeexecution-new-service
-
-  #tradeposition-new-service
-  tradeposition-new-service:
-    name: tradeposition-new-service
-    ports:
-    - port: 8081
-      targetPort: 8081
-      protocol: TCP
-    selector:
-      run: tradeposition-new-service
-
-  #traderecurring-new-service
-  traderecurring-new-service:
-    name: traderecurring-new-service
-    ports:
-    - port: 8082
-      targetPort: 8082
-      protocol: TCP
-    selector:
-      run: traderecurring-new-service
-
-  # operations-service
-  operations-service:
-    name: operations-service
-    ports:
-    - port: 7078
-      targetPort: 80
-      protocol: TCP
-    selector:
-      run: operations-service
+    autoscaling:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 2
+      targetCPUUtilizationPercentage: 80
+      targetMemoryUtilizationPercentage: 80
+    service:
+      ports:
+      - port: 7252
+        targetPort: 80
+        protocol: TCP

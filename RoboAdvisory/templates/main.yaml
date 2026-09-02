@@ -1,0 +1,5 @@
+{{/*
+Every object this chart renders comes from the shared library chart, so the four
+stacks cannot drift apart. Add configuration under StackValues/, not here.
+*/}}
+{{ include "common.all" . }}

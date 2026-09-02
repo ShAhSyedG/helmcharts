@@ -1,0 +1,112 @@
+# Defaults for the LiveInvest chart.
+#
+# This file is NOT a deployable environment. It only documents the schema and
+# supplies chart-wide defaults; every deploy must pass a StackValues file:
+#
+#   helm upgrade --install <release> ./LiveInvest -n <namespace> \
+#     -f LiveInvest/StackValues/<env>-values.yaml
+#
+# Rendering with this file alone fails on purpose, because `services` is empty.
+
+global:
+  app:
+    # Logical stack name; becomes app.kubernetes.io/part-of.
+    name: LiveInvesting
+    version: "1.0"
+    # Namespace stamped onto every object. Prefer `helm --namespace`; this is
+    # kept because the existing StackValues files and pipelines set it.
+    namespace: ""
+  image:
+    # Optional registry prefix, e.g. "123456789.dkr.ecr.us-east-1.amazonaws.com".
+    registry: ""
+    pullPolicy: Always
+    # Default pull secrets; a service may override with its own list.
+    pullSecrets: []
+  ingress:
+    className: alb
+    certificateArn: ""
+    # Annotations applied to every Ingress; a service may add or override.
+    annotations: {}
+  naming:
+    # Object names are the service key as-is. Existing clusters already run these
+    # workloads under those names, and renaming a Deployment forces a
+    # delete/recreate — only enable this for a brand new namespace.
+    prefixWithRelease: false
+
+# Fields the pre-refactor templates accepted in values but never rendered.
+# Left off so adopting this chart is a no-op on the first apply; turn them on one
+# environment at a time after checking them against each image.
+# See docs/values-contract.md.
+compatibility:
+  render:
+    resources: false
+    probes: false
+    command: false
+    serviceAccountName: false
+
+# Narrows a release to a subset of `services`. StackValues leave this empty to
+# deploy the whole stack; a ServiceValues overlay sets `include` to its one
+# service. See docs/values-contract.md.
+serviceSelection:
+  include: []
+  exclude: []
+
+# Merged underneath every entry in `services`; per-service keys win.
+defaults:
+  replicas: 1
+  service:
+    enabled: true
+    type: ClusterIP
+  autoscaling:
+    enabled: false
+  ingress:
+    enabled: false
+
+# Populated per environment by StackValues/<env>-values.yaml.
+#
+# Each key describes one service completely — its workload, its Service, its
+# autoscaling, its Ingress and its TargetGroupBindings:
+#
+#   services:
+#     gateway:
+#       enabled: true                  # false removes it from the release
+#       image:
+#         repository: org/gateway      # omit `image` for a Service with no workload
+#         tag: qa
+#       replicas: 1
+#       env: []
+#       ports:
+#         - containerPort: 80
+#       resources: {}                  # gated by compatibility.render.resources
+#       readinessProbe: {}             # gated by compatibility.render.probes
+#       livenessProbe: {}              # gated by compatibility.render.probes
+#       command: []                    # gated by compatibility.render.command
+#       serviceAccountName: ""         # gated by compatibility.render.serviceAccountName
+#       service:
+#         name: gatewayservice         # defaults to the key
+#         type: ClusterIP
+#         ports:
+#           - name: http
+#             port: 80
+#             targetPort: 80
+#             protocol: TCP
+#       autoscaling:
+#         enabled: true
+#         minReplicas: 1
+#         maxReplicas: 4
+#         targetCPUUtilizationPercentage: 80
+#         targetMemoryUtilizationPercentage: 80
+#       ingress:
+#         enabled: false
+#         hosts:
+#           - host: api.example.com
+#             paths:
+#               - path: /
+#                 pathType: Prefix
+#                 service: gatewayservice
+#                 port: 80
+#       targetGroupBindings:
+#         - name: gateway-tgb
+#           port: 80
+#           targetGroupARN: arn:aws:elasticloadbalancing:...
+services: {}
