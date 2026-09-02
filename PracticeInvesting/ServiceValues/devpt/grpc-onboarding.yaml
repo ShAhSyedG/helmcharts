@@ -1,28 +1,25 @@
-global:
-  app:
-    version: '1.0'
-    name: practicetrading
-    namespace: dev-pt
-deployment:
-  grpc-onboarding:
-    image: tappeng/onboarding_onboarding_pt_grpc
-    tag: dev
-    env:
-    - name: ASPNETCORE_ENVIRONMENT
-      value: "Development"    
-    ports:
-    - containerPort: 80
-    replicacount: 1
-    command:
-      commandDefinations:
-        command: ['sh', '-c', "dotnet Trade.GRPC.dll" ]
-    imagePullSecrets:
-      imageSecret: docker-secret
+# PracticeInvesting — ServiceValues overlay for `grpc-onboarding` in the `devpt` environment.
+#
+# A THIN OVERLAY, not a standalone release. It carries only what differs for one
+# service and narrows the release to that service; everything else — the image
+# repository, ports, env, resources, the Service, the namespace — comes from the
+# StackValues file, which must be passed FIRST:
+#
+#   helm upgrade --install <release> ./PracticeInvesting -n dev-pt \
+#     -f PracticeInvesting/StackValues/devpt-values.yaml \
+#     -f PracticeInvesting/ServiceValues/devpt/grpc-onboarding.yaml
+#
+# Passing this file on its own fails with an explanatory error, because the
+# service it selects is not defined by the values that are loaded.
+#
+# In CI, override the tag rather than editing this file:
+#   --set services.grpc-onboarding.image.tag=$IMAGE_TAG
+
+serviceSelection:
+  include:
+    - grpc-onboarding
+
 services:
   grpc-onboarding:
-    name: grpc-onboardingservice
-    ports:
-    - name: grpc
-      protocol: TCP
-      port: 7133
-      targetPort: 80
+    image:
+      tag: 'dev'

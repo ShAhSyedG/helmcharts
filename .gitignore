@@ -1,0 +1,5 @@
+# Resolved chart dependencies. `common` is a file:// dependency, so these are
+# rebuilt by `make deps` (helm dependency update) and never committed.
+*/charts/
+*/Chart.lock
+*.tgz

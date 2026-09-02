@@ -1,26 +1,49 @@
+# LiveInvest — StackValues for the `production-values` environment.
+#
+# Complete, authoritative definition of every service in this environment.
+# Deploy the whole stack with:
+#
+#   helm upgrade --install <release> ./LiveInvest \
+#     -n prod-lt -f LiveInvest/StackValues/production-values.yaml
+#
+# To deploy a single service, layer its ServiceValues overlay on top of this
+# file; see LiveInvest/README.md.
+#
+# compatibility.render gates the four fields the previous templates silently
+# dropped. They are off so this refactor changes nothing on the first apply.
+# Enable them one environment at a time — see docs/values-contract.md.
+
 global:
   app:
-    version: "1.0"
     name: LiveInvesting
+    version: '1.0'
     namespace: prod-lt
-    imagePullSecrets: docker-secret
-deployment:
-  # trade position service
+  image:
+    registry: ''
+    pullPolicy: Always
+    pullSecrets:
+    - docker-secret
+compatibility:
+  render:
+    resources: false
+    probes: false
+    command: false
+    serviceAccountName: false
+services:
   tradepositionservice:
-    image: organisation/onboarding_tradeposition_service_lt
-    tag: prod
+    image:
+      repository: organisation/onboarding_tradeposition_service_lt
+      tag: prod
+    replicas: 1
     env:
     - name: ASPNETCORE_ENVIRONMENT
-      value: "Prod"
+      value: Prod
     ports:
     - containerPort: 9000
-    replicacount: 1
-    hpa:
-      enabled: true
-      minReplicas: 1
-      maxReplicas: 2
-      cpuUtilization: 80
-      memoryUtilization: 80
+    command:
+    - java
+    - -jar
+    - "/opt/app/*.jar"
     resources:
       limits:
         cpu: 800m
@@ -44,69 +67,30 @@ deployment:
       periodSeconds: 15
       timeoutSeconds: 5
       failureThreshold: 1
-    command:
-      commandDefinations:
-        command: [ "java", "-jar", "/opt/app/*.jar" ]
-
-  # transactions funds monitor service
-  transactionsfunds-monitori-service:
-    image: organisation/transactionfund.fundsstatusmonitor_lt
-    tag: prod
-    env:
-    - name: ASPNETCORE_ENVIRONMENT
-      value: "Prod"
-    ports:
-    - containerPort: 8081
-    replicacount: 1
-    hpa:
+    autoscaling:
       enabled: true
       minReplicas: 1
       maxReplicas: 2
-      cpuUtilization: 80
-      memoryUtilization: 80
-    resources:
-      limits:
-        cpu: 800m
-        memory: 900Mi
-      requests:
-        cpu: 500m
-        memory: 756Mi
-    readinessProbe:
-      httpGet:
-        path: /health/ok
-        port: 8081
-      initialDelaySeconds: 10
-      periodSeconds: 10
-      failureThreshold: 24
-      successThreshold: 1
-    livenessProbe:
-      httpGet:
-        path: /health/ok
-        port: 8081
-      initialDelaySeconds: 15
-      periodSeconds: 15
-      timeoutSeconds: 5
-      failureThreshold: 1
-    command:
-      commandDefinations:
-        command: [ "dotnet", "Transaction.FundsStatusMonitor.dll" ]
-
-  # transactions-new-deployment
+      targetCPUUtilizationPercentage: 80
+      targetMemoryUtilizationPercentage: 80
+    service:
+      ports:
+      - port: 9000
+        targetPort: 9000
+        protocol: TCP
   transactions-new-service:
-    image: organisation/onboarding_new_transactions_lt
-    tag: prod
+    image:
+      repository: organisation/onboarding_new_transactions_lt
+      tag: prod
+    replicas: 1
     env:
     - name: ASPNETCORE_ENVIRONMENT
-      value: "Prod"
+      value: Prod
     ports:
     - containerPort: 80
-    replicacount: 1
-    hpa:
-      enabled: true
-      minReplicas: 1
-      maxReplicas: 2
-      cpuUtilization: 80
-      memoryUtilization: 80
+    command:
+    - dotnet
+    - Transaction.WebApi.dll
     resources:
       limits:
         cpu: 800m
@@ -130,30 +114,58 @@ deployment:
       periodSeconds: 15
       timeoutSeconds: 5
       failureThreshold: 1
+    autoscaling:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 2
+      targetCPUUtilizationPercentage: 80
+      targetMemoryUtilizationPercentage: 80
+    service:
+      ports:
+      - port: 7252
+        targetPort: 80
+        protocol: TCP
+  transactionsfunds-monitori-service:
+    image:
+      repository: organisation/transactionfund.fundsstatusmonitor_lt
+      tag: prod
+    replicas: 1
+    env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: Prod
+    ports:
+    - containerPort: 8081
     command:
-      commandDefinations:
-        command: [ "dotnet", "Transaction.WebApi.dll" ]
-
-################# Services #############################
-
-services:
-  # tradepositionservice
-  tradepositionservice:
-    name: tradepositionservice
-    externalTrafficPolicy: Cluster
-    ports:
-    - port: 9000
-      targetPort: 9000
-      protocol: TCP
-    selector:
-      app: tradepositionservice
-
-  # transactions-new-service
-  transactions-new-service:
-    name: transactions-new-service
-    ports:
-    - port: 7252
-      targetPort: 80
-      protocol: TCP
-    selector:
-      run: transactions-new-service
+    - dotnet
+    - Transaction.FundsStatusMonitor.dll
+    resources:
+      limits:
+        cpu: 800m
+        memory: 900Mi
+      requests:
+        cpu: 500m
+        memory: 756Mi
+    readinessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8081
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      failureThreshold: 24
+      successThreshold: 1
+    livenessProbe:
+      httpGet:
+        path: /health/ok
+        port: 8081
+      initialDelaySeconds: 15
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 1
+    autoscaling:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 2
+      targetCPUUtilizationPercentage: 80
+      targetMemoryUtilizationPercentage: 80
+    service:
+      enabled: false

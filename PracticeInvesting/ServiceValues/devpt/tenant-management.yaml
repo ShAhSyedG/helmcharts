@@ -1,36 +1,25 @@
-global:
-  app:
-    version: '1.0'
-    name: practicetrading
-    namespace: dev-pt
-deployment:
-  tenantmanagement:
-    image: tappeng/tenantmanagement
-    tag: latest
-    env:
-    - name: ASPNETCORE_ENVIRONMENT
-      value: "Development"        
-    env:
-    - name: ASPNETCORE_ENVIRONMENT
-      value: "Development"
-    ports:
-    - containerPort: 8081
-    - containerPort: 8082
-    replicacount: 1
-    command:
-      commandDefinations:
-        command: ['sh', '-c', "java -jar /app/app.jar" ]
-    imagePullSecrets:
-      imageSecret: docker-secret
+# PracticeInvesting — ServiceValues overlay for `tenantmanagement` in the `devpt` environment.
+#
+# A THIN OVERLAY, not a standalone release. It carries only what differs for one
+# service and narrows the release to that service; everything else — the image
+# repository, ports, env, resources, the Service, the namespace — comes from the
+# StackValues file, which must be passed FIRST:
+#
+#   helm upgrade --install <release> ./PracticeInvesting -n dev-pt \
+#     -f PracticeInvesting/StackValues/devpt-values.yaml \
+#     -f PracticeInvesting/ServiceValues/devpt/tenant-management.yaml
+#
+# Passing this file on its own fails with an explanatory error, because the
+# service it selects is not defined by the values that are loaded.
+#
+# In CI, override the tag rather than editing this file:
+#   --set services.tenantmanagement.image.tag=$IMAGE_TAG
+
+serviceSelection:
+  include:
+    - tenantmanagement
+
 services:
   tenantmanagement:
-    name: 'tenantmanagementservice'
-    ports:
-    - name: grpc
-      protocol: TCP
-      port: 8082          # External port (clients will connect to this port)
-      targetPort: 8082    # Internal port on the pod (where gRPC server listens)
-    - name: http
-      protocol: TCP
-      port: 8081             # External port (clients will connect to this port)
-      targetPort: 8081
+    image:
+      tag: 'latest'

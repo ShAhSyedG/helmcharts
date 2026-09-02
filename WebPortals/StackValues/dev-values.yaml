@@ -1,0 +1,20 @@
+# WebPortals — StackValues for the `dev` environment.
+#
+# NOT POPULATED. This file was empty before the refactor, so rendering it failed
+# with a nil-pointer error deep inside a template. It now fails with an
+# explanatory message instead, but it still fails: nothing here is deployable.
+#
+# Fill in `global.app.namespace` and the `services` map, using
+# WebPortals/StackValues/qa-values.yaml as the reference, before deploying.
+
+global:
+  app:
+    name: LiveTradingAdmin
+    version: "1.0"
+    namespace: ""
+  image:
+    registry: ""
+    pullPolicy: Always
+    pullSecrets: []
+
+services: {}

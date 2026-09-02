@@ -1,290 +1,250 @@
+# PracticeInvesting — StackValues for the `production-values` environment.
+#
+# Complete, authoritative definition of every service in this environment.
+# Deploy the whole stack with:
+#
+#   helm upgrade --install <release> ./PracticeInvesting \
+#     -n prod-pt -f PracticeInvesting/StackValues/production-values.yaml
+#
+# To deploy a single service, layer its ServiceValues overlay on top of this
+# file; see PracticeInvesting/README.md.
+#
+# compatibility.render gates the four fields the previous templates silently
+# dropped. They are off so this refactor changes nothing on the first apply.
+# Enable them one environment at a time — see docs/values-contract.md.
+#
+# The `ingressgateway` Ingress was previously hardcoded in templates/ingress.yaml,
+# so dev and qa releases also created it in the prod-pt namespace. It is scoped to
+# production here.
+
 global:
   app:
-    version: '1.0'
     name: practicetrading
+    version: '1.0'
     namespace: prod-pt
-    imagePullSecrets: docker-secret
-deployment:
-# Gateway
+  image:
+    registry: ''
+    pullPolicy: Always
+    pullSecrets:
+    - docker-secret
+  ingress:
+    className: alb
+    certificateArn: arn:aws:acm:us-east-1:711387122713:certificate/4ef3ffbe-44c8-4e1f-b26b-d91241d68940
+    annotations:
+      alb.ingress.kubernetes.io/scheme: internet-facing
+      alb.ingress.kubernetes.io/target-type: ip
+      alb.ingress.kubernetes.io/ssl-redirect: '443'
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
+      alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS",
+        "Port": "443", "StatusCode": "HTTP_301"}}'
+compatibility:
+  render:
+    resources: false
+    probes: false
+    command: false
+    serviceAccountName: false
+services:
   gateway:
-    image: tappeng/onboarding_gateway_pt
-    tag: prod
+    image:
+      repository: tappeng/onboarding_gateway_pt
+      tag: prod
+    replicas: 1
     env:
     - name: ASPNETCORE_ENVIRONMENT
-      value: "Prod"
+      value: Prod
     ports:
     - containerPort: 80
-    replicacount: 1
     serviceAccountName: dev-sa
     command:
-      commandDefinations:
-        command: ['sh', '-c', "dotnet Gateway.dll" ]
-# Onbaording Rest
-  onboarding:
-    image: tappeng/onboarding_onboarding_lt
-    tag: prod
+    - sh
+    - -c
+    - dotnet Gateway.dll
+    autoscaling:
+      enabled: false
+    service:
+      name: gatewayservice
+      ports:
+      - name: grpc
+        protocol: TCP
+        port: 80
+        targetPort: 80
+    ingress:
+      enabled: true
+      name: ingressgateway
+      hosts:
+      - host: onboarding-pt-api.tappengine.com
+        paths:
+        - path: "/*"
+          pathType: ImplementationSpecific
+          service: gatewayservice
+          port: 80
+  grpc-onboarding:
+    image:
+      repository: tappeng/onboarding_onboarding_pt_grpc
+      tag: dev
+    replicas: 1
     env:
     - name: ASPNETCORE_ENVIRONMENT
-      value: "Prod"    
+      value: Prod
+    ports:
+    - containerPort: 80
+    command:
+    - sh
+    - -c
+    - dotnet Trade.GRPC.dll
+    autoscaling:
+      enabled: false
+    service:
+      name: grpc-onboardingservice
+      ports:
+      - name: grpc
+        protocol: TCP
+        port: 7133
+        targetPort: 80
+  grpc-trade:
+    image:
+      repository: tappeng/onboarding_trade_pt_grpc
+      tag: dev
+    replicas: 1
+    env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: Prod
+    ports:
+    - containerPort: 80
+    command:
+    - sh
+    - -c
+    - dotnet Trade.GRPC.dll
+    autoscaling:
+      enabled: false
+    service:
+      name: grpc-tradeservice
+      ports:
+      - name: grpc
+        protocol: TCP
+        port: 8182
+        targetPort: 80
+  onboarding:
+    image:
+      repository: tappeng/onboarding_onboarding_lt
+      tag: prod
+    replicas: 1
+    env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: Prod
     ports:
     - containerPort: 7079
-    replicacount: 1
-
-# Trade TopUp Rest      
-  tradetopup-rest:
-    image: tappeng/onboarding_tradetopup_pt
-    tag: prod
-    env:
-    - name: ASPNETCORE_ENVIRONMENT
-      value: "Prod"        
-    ports:
-    - containerPort: 80
-    replicacount: 1
-    command:
-      commandDefinations:
-        command: ['sh', '-c', "dotnet Trade.TopUp.dll" ]
-     
-# Onboarding Rest 
+    autoscaling:
+      enabled: false
+    service:
+      name: onboardingservice
+      ports:
+      - name: grpc
+        protocol: TCP
+        port: 7079
+        targetPort: 80
   onboarding-rest:
-    image: tappeng/onboarding_onboarding_pt
-    tag: dev
+    image:
+      repository: tappeng/onboarding_onboarding_pt
+      tag: dev
+    replicas: 1
     env:
     - name: ASPNETCORE_ENVIRONMENT
-      value: "Prod"    
+      value: Prod
     ports:
     - containerPort: 80
-    replicacount: 1
     command:
-      commandDefinations:
-        command: ['sh', '-c', "dotnet OnBoarding.WebApi.dll" ]
-# Trade Rest
-  trade-rest:
-    image: tappeng/onboarding_trade_pt
-    tag: dev
-    env:
-    - name: ASPNETCORE_ENVIRONMENT
-      value: "Prod"    
-    ports:
-    - containerPort: 80
-    replicacount: 1
-    command:
-      commandDefinations:
-        command: ['sh', '-c', "dotnet Trade.WebApi.dll" ]
-
-# Trade Recurring Rest        
-  traderecurring-rest:
-    image: tappeng/onboarding_trade_recurring_pt
-    tag: prod
-    env:
-    - name: ASPNETCORE_ENVIRONMENT
-      value: "Prod" 
-    ports:
-    - containerPort: 9091  
-    replicacount: 1
-
-# Trade Execution Report Rest
-  tradeexecutionreport-rest:
-    image: tappeng/onboarding_trade_execution_report_pt
-    tag: prod
-    env:
-    - name: ASPNETCORE_ENVIRONMENT
-      value: "Prod"    
-    ports:
-    - containerPort: 80
-    replicacount: 1
-
-# GRPC Trade 
-  grpc-trade:
-    image: tappeng/onboarding_trade_pt_grpc
-    tag: dev
-    env:
-    - name: ASPNETCORE_ENVIRONMENT
-      value: "Prod"    
-    ports:
-    - containerPort: 80
-    replicacount: 1
-    command:
-      commandDefinations:
-        command: ['sh', '-c', "dotnet Trade.GRPC.dll" ]
-
-# GRPC Onboarding 
-  grpc-onboarding:
-    image: tappeng/onboarding_onboarding_pt_grpc
-    tag: dev
-    env:
-    - name: ASPNETCORE_ENVIRONMENT
-      value: "Prod"    
-    ports:
-    - containerPort: 80
-    replicacount: 1
-    command:
-      commandDefinations:
-        command: ['sh', '-c', "dotnet Trade.GRPC.dll" ]
-  
-# IAM Deployment
-  # keycloak:
-  #   image: tappeng/keycloak
-  #   tag: production
-  #   ports:
-  #   - containerPort: 8081
-  #   command:
-  #   - "/bin/bash"
-  #   - "-c"
-  #   - "curl -L -o /opt/keycloak/lib/postgresql-42.3.3.jar https://jdbc.postgresql.org/download/postgresql-42.3.3.jar && /opt/keycloak/bin/kc.sh start"
-  #   imagePullSecrets:
-  #     imageSecret: docker-secret
-# # Configurations Deployment
-#   configurations:
-#     image: tappeng/onboarding_configurations_lt
-#     tag: dev
-#     env:
-#     - name: ASPNETCORE_ENVIRONMENT
-#       value: "Prod"    
-#     ports:
-#     - containerPort: 5174
-#     imagePullSecrets:
-#       imageSecret: docker-secret
-# # Miscellaneous Deployment
-#   miscellaneous:
-#     image: tappeng/onboarding_miscellaneous_lt
-#     tag: dev
-#     env:
-#     - name: ASPNETCORE_ENVIRONMENT
-#       value: "Prod"    
-#     ports:
-#     - containerPort: 7189
-#     imagePullSecrets:
-#       imageSecret: docker-secret
-# # GRPC Learn Management Deployment
-#   learnmanagement:
-#     image: tappeng/learnmanagement
-#     tag: qa
-#     env:
-#     - name: ASPNETCORE_ENVIRONMENT
-#       value: "Prod"    
-#     ports:
-#     - containerPort: 7010
-#     - containerPort: 5062
-
-###### Services Section ######
-services:
-# Gateway Rest Service
-  gateway:
-    name: gatewayservice
-    ports:
-    - name: grpc
-      protocol: TCP
-      port: 80
-      targetPort: 80
-# Trade TopUp Rest Service
-  tradetopup-rest:
-    name: tradetopupservice
-    ports:
-    - name: grpc
-      protocol: TCP
-      port: 7079
-      targetPort: 80   
-# Onboarding Rest Service
-  onboarding:
-    name: onboardingservice
-    ports:
-    - name: grpc
-      protocol: TCP
-      port: 7079
-      targetPort: 80    
-# Trade Rest Service   
-  trade-rest:
-    name: tradeservice
-    ports:
-    - name: grpc
-      protocol: TCP
-      port: 8182
-      targetPort: 80
-# Trade Recurring Rest Service
+    - sh
+    - -c
+    - dotnet OnBoarding.WebApi.dll
+    autoscaling:
+      enabled: false
+    service:
+      enabled: false
   recurring-trade-service:
-    name: traderecurringservice
+    service:
+      name: traderecurringservice
+      ports:
+      - name: grpc
+        protocol: TCP
+        port: 9091
+        targetPort: 9091
+  trade-rest:
+    image:
+      repository: tappeng/onboarding_trade_pt
+      tag: dev
+    replicas: 1
+    env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: Prod
     ports:
-    - name: grpc
-      protocol: TCP
-      port: 9091
-      targetPort: 9091  
-# Trade Execution Report Rest Service
+    - containerPort: 80
+    command:
+    - sh
+    - -c
+    - dotnet Trade.WebApi.dll
+    autoscaling:
+      enabled: false
+    service:
+      name: tradeservice
+      ports:
+      - name: grpc
+        protocol: TCP
+        port: 8182
+        targetPort: 80
   tradeexecutionreport-rest:
-    name: tradeexecutionreportservice
+    image:
+      repository: tappeng/onboarding_trade_execution_report_pt
+      tag: prod
+    replicas: 1
+    env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: Prod
     ports:
-    - name: http
-      protocol: TCP
-      port: 80
-      targetPort: 80
-      
-# GRPC Trade Service  
-  grpc-trade:
-    name: grpc-tradeservice
+    - containerPort: 80
+    autoscaling:
+      enabled: false
+    service:
+      name: tradeexecutionreportservice
+      ports:
+      - name: http
+        protocol: TCP
+        port: 80
+        targetPort: 80
+  traderecurring-rest:
+    image:
+      repository: tappeng/onboarding_trade_recurring_pt
+      tag: prod
+    replicas: 1
+    env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: Prod
     ports:
-    - name: grpc
-      protocol: TCP
-      port: 8182
-      targetPort: 80
-# GRPC Onboarding Service      
-  grpc-onboarding:
-    name: grpc-onboardingservice
+    - containerPort: 9091
+    autoscaling:
+      enabled: false
+    service:
+      enabled: false
+  tradetopup-rest:
+    image:
+      repository: tappeng/onboarding_tradetopup_pt
+      tag: prod
+    replicas: 1
+    env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: Prod
     ports:
-    - name: grpc
-      protocol: TCP
-      port: 7133
-      targetPort: 80   
-        
-# # Tenant Management Service
-#   tenantmanagement:
-#     name: 'tenantmanagementservice'
-#     ports:
-#     - name: grpc
-#       protocol: TCP
-#       port: 8082          # External port (clients will connect to this port)
-#       targetPort: 8082    # Internal port on the pod (where gRPC server listens)
-#     - name: http
-#       protocol: TCP
-#       port: 8081             # External port (clients will connect to this port)
-#       targetPort: 8081
-# IAM services     
-  # keycloak:
-  #   name: 'keycloakservice'
-  #   ports:
-  #   - name: http
-  #     protocol: TCP
-  #     port: 80          # External port (clients will connect to this port)
-  #     targetPort: 8080    # Internal port on the pod (where gRPC server listens)
-# Configurations Service
-#   configurations:
-#     name: configurationsservice
-#     ports:
-#     - name: grpc
-#       protocol: TCP
-#       port: 5174
-#       targetPort: 80
-# Miscellaneous Service
-IngressRoute:
-  gateway-ingress:
-    hostname: 
-    - host: "prod-pt-onboarding-api.tappengine.com"
-      http:
-        paths:
-        - pathType: Prefix
-          path: "/"
-          backend:
-            service:
-              name: gatewayservice
-              port:
-                number: 80
-  # iam-ingress:
-  #   hostname: 
-  #   - host: "iam.tappengine.com"
-  #     http:
-  #       paths:
-  #       - pathType: Prefix
-  #         path: "/"
-  #         backend:
-  #           service:
-  #             name: iamservice
-  #             port:
-  #               number: 80
+    - containerPort: 80
+    command:
+    - sh
+    - -c
+    - dotnet Trade.TopUp.dll
+    autoscaling:
+      enabled: false
+    service:
+      name: tradetopupservice
+      ports:
+      - name: grpc
+        protocol: TCP
+        port: 7079
+        targetPort: 80

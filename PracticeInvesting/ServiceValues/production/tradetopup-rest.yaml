@@ -1,29 +1,25 @@
-global:
-  app:
-    version: '1.0'
-    name: practicetrading
-    namespace: production
-deployment:
-# Trade TopUp Rest      
-  tradetopup-rest:
-    image: tappeng/onboarding_tradetopup_pt
-    tag: prod
-    env:
-    - name: ASPNETCORE_ENVIRONMENT
-      value: "Production"        
-    ports:
-    - containerPort: 80
-    replicacount: 1
-    command:
-      commandDefinations:
-        command: ['sh', '-c', "dotnet Trade.TopUp.dll" ]
-    imagePullSecrets:
-      imageSecret: docker-secret
+# PracticeInvesting — ServiceValues overlay for `tradetopup-rest` in the `production` environment.
+#
+# A THIN OVERLAY, not a standalone release. It carries only what differs for one
+# service and narrows the release to that service; everything else — the image
+# repository, ports, env, resources, the Service, the namespace — comes from the
+# StackValues file, which must be passed FIRST:
+#
+#   helm upgrade --install <release> ./PracticeInvesting -n prod-pt \
+#     -f PracticeInvesting/StackValues/production-values.yaml \
+#     -f PracticeInvesting/ServiceValues/production/tradetopup-rest.yaml
+#
+# Passing this file on its own fails with an explanatory error, because the
+# service it selects is not defined by the values that are loaded.
+#
+# In CI, override the tag rather than editing this file:
+#   --set services.tradetopup-rest.image.tag=$IMAGE_TAG
+
+serviceSelection:
+  include:
+    - tradetopup-rest
+
 services:
   tradetopup-rest:
-    name: tradetopupservice
-    ports:
-    - name: grpc
-      protocol: TCP
-      port: 7079
-      targetPort: 80   
+    image:
+      tag: 'prod'

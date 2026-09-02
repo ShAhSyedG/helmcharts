@@ -1,0 +1,25 @@
+# RoboAdvisory — ServiceValues overlay for `roboadvconfig` in the `production` environment.
+#
+# A THIN OVERLAY, not a standalone release. It carries only what differs for one
+# service and narrows the release to that service; everything else — the image
+# repository, ports, env, resources, the Service, the namespace — comes from the
+# StackValues file, which must be passed FIRST:
+#
+#   helm upgrade --install <release> ./RoboAdvisory -n prod-robo \
+#     -f RoboAdvisory/StackValues/production-values.yaml \
+#     -f RoboAdvisory/ServiceValues/production/roboadvconfig.yaml
+#
+# Passing this file on its own fails with an explanatory error, because the
+# service it selects is not defined by the values that are loaded.
+#
+# In CI, override the tag rather than editing this file:
+#   --set services.roboadvconfig.image.tag=$IMAGE_TAG
+
+serviceSelection:
+  include:
+    - roboadvconfig
+
+services:
+  roboadvconfig:
+    image:
+      tag: 'prod'

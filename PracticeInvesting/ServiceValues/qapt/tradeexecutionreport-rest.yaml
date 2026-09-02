@@ -1,0 +1,25 @@
+# PracticeInvesting — ServiceValues overlay for `tradeexecutionreport-rest` in the `qapt` environment.
+#
+# A THIN OVERLAY, not a standalone release. It carries only what differs for one
+# service and narrows the release to that service; everything else — the image
+# repository, ports, env, resources, the Service, the namespace — comes from the
+# StackValues file, which must be passed FIRST:
+#
+#   helm upgrade --install <release> ./PracticeInvesting -n qa-pt \
+#     -f PracticeInvesting/StackValues/qapt-values.yaml \
+#     -f PracticeInvesting/ServiceValues/qapt/tradeexecutionreport-rest.yaml
+#
+# Passing this file on its own fails with an explanatory error, because the
+# service it selects is not defined by the values that are loaded.
+#
+# In CI, override the tag rather than editing this file:
+#   --set services.tradeexecutionreport-rest.image.tag=$IMAGE_TAG
+
+serviceSelection:
+  include:
+    - tradeexecutionreport-rest
+
+services:
+  tradeexecutionreport-rest:
+    image:
+      tag: 'prod'
